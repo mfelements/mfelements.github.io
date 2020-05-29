@@ -1,9 +1,12 @@
 import withLog, { withName } from './logger/index.js'
+import Hostname from './hostname.js'
 
 function getApiUrl(){
-    let apiUrl = decodeURIComponent(location.pathname.slice(1));
-    if(!apiUrl.endsWith('/')) apiUrl += '/';
-    return apiUrl
+    const url = new URL('https://' + decodeURIComponent(location.pathname.slice(1)));
+    if(new Hostname(url.hostname).local) url.protocol = 'http';
+    const { href } = url;
+    if(!href.endsWith('/')) href += '/';
+    return href
 }
 
 function parseResult({ error, data }){
