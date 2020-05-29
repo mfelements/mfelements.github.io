@@ -1,5 +1,3 @@
-import * as bit64 from './bit64.js'
-
 const local4 = [
     '10.0.0.0/8',
     '127.0.0.0/8',
@@ -10,7 +8,7 @@ const local4 = [
 const localHosts = /^((.+\.local)|localhost|loopback)$/;
 
 function ipToNum(ip){
-    return Number.parseInt(ip.split('.').map(v => (+v).toString(16).padStart(2, '0')).join(''), 16)
+    return BigInt('0x' + ip.split('.').map(v => (+v).toString(16).padStart(2, '0')).join(''))
 }
 
 function numToIp(num){
@@ -18,14 +16,14 @@ function numToIp(num){
 }
 
 function mask(size){
-    return parseInt(''.padStart(size, '1').padEnd(32, '0'), 2)
+    return BigInt('0b' + ''.padStart(size, '1').padEnd(32, '0'))
 }
 
 function inRange(ip, range){
     const [ rangeIp, bits ] = range.split('/');
     const bitMask = mask(+bits);
-    const from = bit64.and(ipToNum(rangeIp), bitMask);
-    const to = from + bit64.xor(bitMask, 0xffffffff);
+    const from = ipToNum(rangeIp) & bitMask;
+    const to = from + (bitMask ^ 0xffffffffn);
     const numIp = ipToNum(ip);
     return numIp >= from && numIp <= to
 }
