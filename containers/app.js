@@ -5,6 +5,7 @@ import API from '../components/api.js'
 import generate from '../components/generator.js'
 
 loadStyle('main');
+loadStyle('theme0');
 
 const api = Symbol();
 

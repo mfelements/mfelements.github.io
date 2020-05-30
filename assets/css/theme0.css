@@ -1,0 +1,5 @@
+body.theme0, body:not(.themed){
+    --bg-primary: #f7f7f7;
+    --bg-secondary: #fff;
+    --text-color: #000;
+}
