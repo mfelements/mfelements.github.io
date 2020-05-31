@@ -60,3 +60,18 @@ div:not([class]) > * {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.image{
+    background-color: #666;
+    background-size: cover;
+    background-position: center;
+    border-radius: 1.5em;
+}
+
+.image.round{
+    border-radius: 50%;
+}
+
+.image > div{
+    padding-bottom: calc(100% / var(--ratio-w) * var(--ratio-h));
+}
