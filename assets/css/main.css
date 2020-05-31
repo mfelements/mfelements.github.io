@@ -6,8 +6,12 @@
     outline: none;
 }
 
-*::-moz-focus-inner{
+button::-moz-focus-inner{
     border: 0;
+}
+
+input, textarea, button, select, a{
+    -webkit-tap-highlight-color: #0000;
 }
 
 body, html{
@@ -31,15 +35,16 @@ button{
     padding: 0.5rem;
     border: 0;
     border-radius: 1rem;
+    background: var(--bg-secondary);
 }
 
 button:hover, button:focus{
-    background: var(--bg-secondary);
+    background: var(--bg-primary);
 }
 
 button:active{
     background: var(--text-color) !important;
-    color: var(--bg-primary) !important;
+    color: var(--bg-secondary) !important;
 }
 
 .block{
