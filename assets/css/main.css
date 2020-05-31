@@ -65,7 +65,7 @@ div:not([class]) > * {
     background-color: #666;
     background-size: cover;
     background-position: center;
-    border-radius: 1.5em;
+    border-radius: 1.5rem;
 }
 
 .image.round{
