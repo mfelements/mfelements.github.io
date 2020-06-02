@@ -39,12 +39,8 @@ function isIp(hostname){
 
 export default class Hostname{
     constructor(name){
-        try{
-            this.local = isIp(name)
-                ? local4.map(mask => inRange(name, mask)).reduce((p, c) => p || c)
-                : localHosts.test(name)
-        } catch(e){
-            this.local = false
-        }
+        this.local = isIp(name)
+            ? local4.map(mask => inRange(name, mask)).reduce((p, c) => p || c)
+            : localHosts.test(name)
     }
 }
