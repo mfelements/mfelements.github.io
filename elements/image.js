@@ -4,8 +4,11 @@ const ratioFormat = /^\d+:\d+$/;
 const widthFormat = /^\d+((r?em)|%)$/;
 
 export default class Image extends Component{
-    state = {
-        src: ''
+    constructor(props){
+        super(props);
+        this.state = {
+            src: ''
+        }
     }
     checkProps(){
         const { src, ratio, width } = this.props;

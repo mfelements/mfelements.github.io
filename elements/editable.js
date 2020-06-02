@@ -4,9 +4,12 @@ import sprintf from '../components/sprintf.js'
 export const editables = {};
 
 export default class Editable extends Component{
-    state = {
-        template: '',
-        data: [],
+    constructor(props){
+        super(props);
+        this.state = {
+            template: '',
+            data: [],
+        }
     }
     componentDidMount(){
         const { id, template, default: data } = this.props;

@@ -10,9 +10,12 @@ loadStyle('theme0');
 const api = Symbol();
 
 export default class App extends Component{
-    [api] = new API
-    state = {
-        generated: null,
+    constructor(props){
+        super(props);
+        this[api] = new API;
+        this.state = {
+            generated: null,
+        }
     }
     async componentDidMount(){
         try{

@@ -2,9 +2,12 @@ import { Component } from '../components/preact.js'
 import sprintf from '../components/sprintf.js'
 
 export default class Dynamic extends Component{
-    state = {
-        template: '',
-        data: [],
+    constructor(props){
+        super(props);
+        this.state = {
+            template: '',
+            data: [],
+        }
     }
     componentDidMount(){
         const { template, update: { action, args }, default: def, interval, api } = this.props;
