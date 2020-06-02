@@ -4,12 +4,6 @@ const ratioFormat = /^\d+:\d+$/;
 const widthFormat = /^\d+((r?em)|%)$/;
 
 export default class Image extends Component{
-    constructor(props){
-        super(props);
-        this.state = {
-            src: ''
-        }
-    }
     checkProps(){
         const { src, ratio, width } = this.props;
         if(!ratioFormat.test(ratio)) throw new Error(`Ratio cannot be defined like ${ratio}. The only allowed format is "1:2", where 1 is width coeffitient and 2 is height one`);
@@ -17,22 +11,11 @@ export default class Image extends Component{
         const url = new URL(src);
         if(url.protocol !== 'https:') throw new Error('Image cannot be loaded. Only HTTPS links are supported')
     }
-    async componentDidMount(){
-        const { src } = this.props;
-        const blob = URL.createObjectURL(await fetch(src).then(r => r.blob()));
-        this.setState({ src: blob })
-    }
-    componentWillUnmount(){
-        try{ URL.revokeObjectURL(this.state.src) } catch(e){}
-    }
     render(){
-        const { ratio, round, width } = this.props;
-        const { src } = this.state;
+        const { src, ratio, round, width } = this.props;
         const props = {
             class: 'image',
-            style: {
-                backgroundImage: `url(${src})`,
-            },
+            style: {},
         };
         if(ratio){
             const [ ratioW, ratioH ] = ratio.split(':');
@@ -41,6 +24,6 @@ export default class Image extends Component{
         }
         if(width) props.style.width = width;
         if(round) props.class += ' round';
-        return html`<div ...${props}><div/></div>`
+        return html`<div ...${props}><div style=${{ backgroundImage: `url("${src}")` }}/><div/></div>`
     }
 }
