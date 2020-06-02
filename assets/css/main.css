@@ -36,6 +36,7 @@ button{
     border: 0;
     border-radius: 1rem;
     background: var(--bg-secondary);
+    box-shadow: var(--btn-shadow);
 }
 
 button:hover, button:focus{
@@ -52,13 +53,22 @@ button:active{
     padding: 1.5rem;
     border-radius: 1.5rem;
     margin-bottom: 1.5rem;
+    box-shadow: var(--block-shadow);
 }
 
 div:not([class]) > * {
+    --margin: 1rem;
     display: inline-block;
-    width: calc(100% / var(--inline-count));
+    width: calc(100% / var(--inline-count) - (var(--margin) * (var(--inline-count) - 1) / var(--inline-count)));
     overflow: hidden;
     text-overflow: ellipsis;
+    vertical-align: top;
+    margin: var(--margin);
+    margin-right: 0;
+}
+
+div:not([class]) > *:first-child{
+    margin-left: 0;
 }
 
 .image{
@@ -87,4 +97,14 @@ div:not([class]) > * {
 .image > div:last-child{
     background: #666;
     padding-bottom: calc(100% / var(--ratio-w) * var(--ratio-h));
+}
+
+/* mobile styles */
+
+@media (max-width: 520px) {
+    div:not([class]) > * {
+        display: block;
+        width: 100%;
+        margin-left: 0;
+    }
 }
