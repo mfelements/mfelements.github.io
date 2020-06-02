@@ -1,18 +1,22 @@
 import { Component } from '../components/preact.js'
-import sprintf from '../components/sprintf.js'
+import { mapChildren } from './block.js'
+
+function setIntervalImmediate(callback, ms, ...args){
+    callback(...args);
+    return setInterval(callback, ms, ...args)
+}
 
 export default class Dynamic extends Component{
     constructor(props){
         super(props);
         this.state = {
-            template: '',
             data: [],
         }
     }
     componentDidMount(){
-        const { template, update: { action, args }, default: def, interval, api } = this.props;
-        this.setState({ template, data: def, })
-        this.interval = setInterval(async () => {
+        const { update: { action, args }, default: data, interval, api } = this.props;
+        this.setState({ data });
+        this.interval = setIntervalImmediate(async () => {
             const data = await api[action](...(args || []));
             this.setState({data})
         }, interval)
@@ -21,7 +25,8 @@ export default class Dynamic extends Component{
         clearInterval(this.interval)
     }
     render(){
-        const { template, data } = this.state;
-        return sprintf(template, ...data)
+        const { api, page } = this.props;
+        const { data } = this.state;
+        return mapChildren(page, data, api)
     }
 }
