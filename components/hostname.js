@@ -23,7 +23,7 @@ function inRange(ip, range){
     const [ rangeIp, bits ] = range.split('/');
     const bitMask = mask(+bits);
     const from = ipToNum(rangeIp) & bitMask;
-    const to = from + (bitMask ^ 0xffffffffn);
+    const to = from + (bitMask ^ BigInt(0xffffffff));
     const numIp = ipToNum(ip);
     return numIp >= from && numIp <= to
 }
@@ -37,8 +37,12 @@ function isIp(hostname){
 
 export default class Hostname{
     constructor(name){
-        this.local = isIp(name)
-            ? local4.map(mask => inRange(name, mask)).reduce((p, c) => p || c)
-            : localHosts.test(name)
+        try{
+            this.local = isIp(name)
+                ? local4.map(mask => inRange(name, mask)).reduce((p, c) => p || c)
+                : localHosts.test(name)
+        } catch(e){
+            this.local = false
+        }
     }
 }
