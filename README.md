@@ -7,12 +7,13 @@
 Client is requesting the method API getPage(name: string), with parameter name = 'main', witch returns an object of main page.
 
 The structure of the main page:
-
-`{
+```
+{
   type: 'page'
   childs: (Element | string)[]
   title: string
-}`
+}
+```
 
 **Element** — all elements can be found by this link: https://github.com/mfelements/service-demo/blob/master/index.mjs
 
@@ -25,9 +26,10 @@ The structure of the main page:
 ## Request
 
 Client need to make a request to: server_name/method_name with mandatory http headers:
-
-`Content-Type: application/json
-Origin: https://mfelements.github.io`
+```
+Content-Type: application/json
+Origin: https://mfelements.github.io
+```
 
 If the request doesn't contain those headers it will be refused.
 
@@ -42,10 +44,11 @@ On **GET** method will be processed without arguments.
 ## Response
 
 The response should contain http headers:
-
-`Content-Type: application/json
+```
+Content-Type: application/json
 Access-Control-Allow-Origin: https://mfelements.github.io
-Access-Control-Allow-Headers: content-type`
+Access-Control-Allow-Headers: content-type
+```
 
 Response body - encoded object in JSON with just one field - **error** or **data**.
 
