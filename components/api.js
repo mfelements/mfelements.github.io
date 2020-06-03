@@ -4,7 +4,7 @@ import Hostname from './hostname.js'
 function getApiUrl(){
     const url = new URL('https://' + decodeURIComponent(location.pathname.slice(1)));
     if(new Hostname(url.hostname).local) url.protocol = 'http';
-    const { href } = url;
+    let { href } = url;
     if(!href.endsWith('/')) href += '/';
     return href
 }
