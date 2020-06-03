@@ -10,7 +10,7 @@ The structure of the main page:
 ```
 {
   type: 'page'
-  childs: (Element | string)[]
+  children: (Element | string)[]
   title: string
 }
 ```
@@ -58,4 +58,4 @@ Response body - encoded object in JSON with just one field - **error** or **data
 
 data should be returned when the execution was success. It represents the massive of elements, lines or pages, that will be displayed as a result. Example:
 
-`{"data":{"type":"page","childs":["Some page text",{"type":"button","onClick":{"action":"getPage","args":["main"]},"text":"⬅️ Back"}]}}`
+`{"data":{"type":"page","children":["Some page text",{"type":"button","onClick":{"action":"getPage","args":["main"]},"text":"⬅️ Back"}]}}`

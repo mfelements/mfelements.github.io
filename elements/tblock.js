@@ -3,11 +3,11 @@ import { mapChildren } from './block.js'
 
 export default class TBlock extends Component{
     render(){
-        const { childs, api, page } = this.props;
+        const { children, api, page } = this.props;
         return html`<div style=${{
-            '--inline-count': childs.length
+            '--inline-count': children.length
         }}>${
-            mapChildren(page, childs, api)
+            mapChildren(page, children, api)
         }</div>`
     }
 }

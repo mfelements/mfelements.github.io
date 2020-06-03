@@ -3,9 +3,9 @@ import { mapChildren } from './block.js'
 
 export default class Page extends Component{
     componentDidMount(){
-        const { childs, api } = this.props;
+        const { children, api } = this.props;
         this.setState({
-            content: mapChildren(this, childs, api),
+            content: mapChildren(this, children, api),
         })
     }
     render(){
