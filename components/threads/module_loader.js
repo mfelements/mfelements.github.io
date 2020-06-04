@@ -2,6 +2,23 @@
 
 const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
 
+const overrides = `'use strict';
+class Function{
+    constructor(...args){
+        const src = args.pop();
+        return eval('(function(' + args.join(', ') + '){\\n' + src + '\\n})')
+    }
+}
+class AsyncFunction{
+    constructor(...args){
+        const src = args.pop();
+        return eval('(async function(' + args.join(', ') + '){\\n' + src + '\\n})')
+    }
+}
+Object.getPrototypeOf(() => {}).constructor = Function;
+Object.getPrototypeOf(async () => {}).constructor = AsyncFunction;
+`
+
 const moduleStorage = Object.create(null);
 
 const restrictedNames = [
@@ -44,7 +61,6 @@ function argsAndExport(__filename){
         __dirname,
         require,
         requireAsync,
-        AsyncFunction,
         module,
         exports,
     });
@@ -63,7 +79,7 @@ function require(url){
     if(url in moduleStorage) return moduleStorage[url];
     const src = downloadSync(url);
     const { keys, args, module, self } = argsAndExport(url);
-    const f = new Function(...keys, `'use strict';\n${src}`);
+    const f = new Function(...keys, `${overrides}\n${src}`);
     f.call(self, ...args);
     moduleStorage[url] = module.exports;
     return module.exports
@@ -73,7 +89,7 @@ async function requireAsync(url){
     if(url in moduleStorage) return moduleStorage[url];
     const src = await fetch(url).then(r => r.text());
     const { keys, args, module, self } = argsAndExport(url);
-    const f = new AsyncFunction(...keys, `'use strict';\n${src}`);
+    const f = new AsyncFunction(...keys, `${overrides};\n${src}`);
     await f.call(self, ...args);
     moduleStorage[url] = module.exports;
     return module.exports
