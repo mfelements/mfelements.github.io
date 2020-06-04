@@ -1,18 +1,23 @@
 'use strict';
 
+importScripts('./rand.js');
+
 const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
+
+const argsName = '_' + rand(),
+    srcName = '_' + rand();
 
 const overrides = `'use strict';
 class Function{
-    constructor(...args){
-        const src = args.pop();
-        return eval('(function(' + args.join(', ') + '){\\n' + src + '\\n})')
+    constructor(...${argsName}){
+        const ${srcName} = ${argsName}.pop();
+        return eval('(function(' + ${argsName}.join(', ') + '){\\n' + ${srcName} + '\\n})')
     }
 }
 class AsyncFunction{
-    constructor(...args){
-        const src = args.pop();
-        return eval('(async function(' + args.join(', ') + '){\\n' + src + '\\n})')
+    constructor(...${argsName}){
+        const ${srcName} = ${argsName}.pop();
+        return eval('(async function(' + ${argsName}.join(', ') + '){\\n' + ${srcName} + '\\n})')
     }
 }
 Object.getPrototypeOf(() => {}).constructor = Function;
