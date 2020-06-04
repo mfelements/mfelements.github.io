@@ -1,3 +1,7 @@
+'use strict';
+
+const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
+
 const moduleStorage = Object.create(null);
 
 const restrictedNames = [
@@ -7,6 +11,8 @@ const restrictedNames = [
     'postMessage',
     'terminate',
     'importScripts',
+    'arguments',
+    'self',
 ];
 
 function downloadSync(url){
@@ -22,14 +28,54 @@ function dirname(url){
     return parts.join('/')
 }
 
+class ModuleGlobalScope{
+    constructor(){
+        throw new TypeError('Cannot construct ModuleGlobalScope')
+    }
+}
+
+function argsAndExport(__filename){
+    const __dirname = dirname(__filename);
+    const exports = {};
+    const module = { exports };
+    const args = Object.assign(Object.create(ModuleGlobalScope.prototype), {
+        ...restrictedNames.reduce((o, p) => { if(typeof o !== 'object') o = { [p]: undefined }; o[p] = undefined; return o }),
+        __filename,
+        __dirname,
+        require,
+        requireAsync,
+        AsyncFunction,
+        module,
+        exports,
+    });
+    args.global = args;
+    args.self = args;
+    const keys = Object.keys(args);
+    for(const i in args) if(args[i] === undefined) delete args[i];
+    return {
+        keys,
+        args: keys.map(p => args[p]),
+        module,
+        global: args.global,
+    }
+}
+
 function require(url){
     if(url in moduleStorage) return moduleStorage[url];
     const src = downloadSync(url);
-    const __dirname = dirname(url);
-    const exports = {};
-    const module = { exports };
-    const f = new Function(...restrictedNames, '__filename', '__dirname', 'require', 'module', 'exports', src);
-    f(...restrictedNames.map(() => {}), url, __dirname, require, module, exports);
+    const { keys, args, module, global } = argsAndExport(url);
+    const f = new Function(...keys, `'use strict';\n${src}`);
+    f.call(global, ...args);
+    moduleStorage[url] = module.exports;
+    return module.exports
+}
+
+async function requireAsync(url){
+    if(url in moduleStorage) return moduleStorage[url];
+    const src = await fetch(url).then(r => r.text());
+    const { keys, args, module, global } = argsAndExport(url);
+    const f = new AsyncFunction(...keys, `'use strict';\n${src}`);
+    await f.call(global, ...args);
     moduleStorage[url] = module.exports;
     return module.exports
 }
