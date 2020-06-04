@@ -20,8 +20,8 @@ class AsyncFunction{
         return eval('(async function(' + ${argsName}.join(', ') + '){\\n' + ${srcName} + '\\n})')
     }
 }
-Object.getPrototypeOf(() => {}).constructor = Function;
-Object.getPrototypeOf(async () => {}).constructor = AsyncFunction;
+Object.defineProperty(Object.getPrototypeOf(() => {}), 'constructor', { value: Function });
+Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { value: AsyncFunction });
 `
 
 const moduleStorage = Object.create(null);
@@ -33,7 +33,6 @@ const restrictedNames = [
     'postMessage',
     'terminate',
     'importScripts',
-    'arguments',
     'globalThis',
 ];
 
