@@ -4,8 +4,7 @@ const ratioFormat = /^\d+:\d+$/;
 const widthFormat = /^\d+((r?em)|%)$/;
 
 export default class Image extends Component{
-    checkProps(){
-        const { src, ratio, width } = this.props;
+    static checkProps({ src, ratio, width }){
         if(!ratioFormat.test(ratio)) throw new Error(`Ratio cannot be defined like ${ratio}. The only allowed format is "1:2", where 1 is width coeffitient and 2 is height one`);
         if(width && !widthFormat.test(width)) throw new Error(`Width cannot be ${width}. Allowed "em", "rem" and "%" values`);
         const url = new URL(src);

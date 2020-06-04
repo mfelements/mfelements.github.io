@@ -1,5 +1,7 @@
 import withLog, { withName } from './logger/index.js'
 import Hostname from './hostname.js'
+import errorLog from './errorMessage.js'
+import * as elements from './elements.js'
 
 function getApiUrl(){
     const url = new URL('https://' + decodeURIComponent(location.pathname.slice(1)));
@@ -9,8 +11,23 @@ function getApiUrl(){
     return href
 }
 
+function checkProps(testData){
+    if(typeof testData === 'object' && !Array.isArray(testData)){
+        const Component = elements[testData.type];
+        if(Component && typeof Component.checkProps === 'function'){
+            try{
+                Component.checkProps(testData)
+            } catch(e){
+                throw errorLog(e)
+            }
+        }
+        for(const child of (testData.children || [])) checkProps(child)
+    }
+}
+
 function parseResult({ error, data }){
-    if(error) throw new Error(error);
+    if(error) throw errorLog(new Error(error));
+    checkProps(data);
     return data
 }
 
