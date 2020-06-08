@@ -19,7 +19,7 @@ export default class App extends Component{
     }
     async componentDidMount(){
         try{
-            const page = await this[api].getPage('main');
+            const page = await this[api].getIndex();
             this.setState({
                 generated: generate(this[api], page),
             })
