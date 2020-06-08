@@ -4,7 +4,7 @@
 
 # How it works?
 
-Client is requesting the method API getPage(name: string), with parameter name = 'main', witch returns an object of main page.
+Client is requesting the method API getIndex(), with no parameters, witch returns an object of main page.
 
 The structure of the main page:
 ```
