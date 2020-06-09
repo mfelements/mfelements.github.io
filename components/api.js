@@ -3,6 +3,8 @@ import Hostname from './hostname.js'
 import errorLog from './errorMessage.js'
 import * as elements from './elements.js'
 
+export const intercepted = Object.create(null);
+
 function getApiUrl(){
     const url = new URL('https://' + decodeURIComponent(location.pathname.slice(1)));
     if(new Hostname(url.hostname).local) url.protocol = 'http';
@@ -37,6 +39,10 @@ export default class API{
         return new Proxy(Object.create(API.prototype), {
             get(_, p){
                 return withLog(console => withName('API.' + p, (...data) => {
+                    if(p in intercepted){
+                        console.info('Intercepted action');
+                        return intercepted[p](...data)
+                    }
                     const targetUrl = apiUrl + encodeURIComponent(p);
                     const options = {
                         method: data.length ? 'POST' : 'GET',

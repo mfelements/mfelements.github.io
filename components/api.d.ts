@@ -8,3 +8,7 @@ declare const API: {
 }
 
 export default API
+
+export const intercepted: {
+    [method: string]: (...args: any[]) => Promise<any>
+}
