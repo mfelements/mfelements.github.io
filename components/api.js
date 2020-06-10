@@ -3,9 +3,24 @@ import Hostname from './hostname.js'
 import errorLog from './errorMessage.js'
 import * as elements from './elements.js'
 
-export const intercepted = Object.create(null);
+const intercepted = Object.create(null);
+const interceptedByUrl = Object.create(null);
 
-function getApiUrl(){
+export function registerAction(moduleUrl, name, callback){
+    interceptedByUrl[name] = moduleUrl;
+    intercepted[name] = callback
+}
+
+export function unregisterActions(moduleUrl){
+    for(const name in intercepted){
+        if(moduleUrl === interceptedByUrl[name]){
+            delete interceptedByUrl[name];
+            delete intercepted[name]
+        }
+    }
+}
+
+export function getApiUrl(){
     const url = new URL('https://' + decodeURIComponent(location.pathname.slice(1)));
     if(new Hostname(url.hostname).local) url.protocol = 'http';
     let { href } = url;

@@ -14,3 +14,5 @@ export const containers = root + '/containers'
 export const css = assets + '/css'
 
 export const images = assets + '/images'
+
+export const threads = components + '/threads'

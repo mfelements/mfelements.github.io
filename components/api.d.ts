@@ -9,6 +9,8 @@ declare const API: {
 
 export default API
 
-export const intercepted: {
-    [method: string]: (...args: any[]) => Promise<any>
-}
+export function registerAction(moduleUrl: string, name: string, callback: (...args) => any): void
+
+export function unregisterActions(moduleUrl: string): void
+
+export function getApiUrl(): string

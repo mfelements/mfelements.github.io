@@ -7,9 +7,8 @@ const registerAction = (() => {
 
     onmessage = async ({ data: { requireScript, action, id } }) => {
         if(requireScript){
-            const { base, url } = requireScript;
             try{
-                await requireAsync.call({ base }, url);
+                await requireAsync.call({ base: 'http://localhost/' }, requireScript);
                 postMessage({ id })
             } catch(e){
                 postMessage({ id, error: `Cannot load module: ${e.message}` })
@@ -22,8 +21,6 @@ const registerAction = (() => {
                 postMessage({ id, error: e.message })
             }
         }
-        const exported = require(requireScript);
-        console.log({exported})
     };
 
     return (name, callback) => {
