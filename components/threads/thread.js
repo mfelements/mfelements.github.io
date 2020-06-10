@@ -5,7 +5,7 @@ const registerAction = (() => {
 
     const registeredActions = Object.create(null);
 
-    onmessage = async ({ data: { requireScript, action, id } }) => {
+    onmessage = async ({ data: { requireScript, action, id, actionResult, actionError } }) => {
         if(requireScript){
             try{
                 await requireAsync.call({ base: 'http://localhost/' }, requireScript);
@@ -19,6 +19,11 @@ const registerAction = (() => {
                 postMessage({ id, data: await registeredActions[name](...args) })
             } catch(e){
                 postMessage({ id, error: e.message })
+            }
+        } else if(actionResult || actionError){
+            if(id in module.actionStorage){
+                if(actionError) module.actionStorage[id].reject(actionError);
+                else module.actionStorage[id].resolve(actionResult)
             }
         }
     };

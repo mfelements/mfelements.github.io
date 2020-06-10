@@ -23,16 +23,20 @@ const actions = {
                     reject(reason)
                 }
             };
-            this.postMessage({ id, args })
+            this.postMessage({ id, action: { name, args } })
         }))
-    }
+    },
+    apiCall({ name, args }){
+        return this.api[name](...args)
+    },
 }
 
-export default url => new Promise((resolve, reject) => {
+export default (url, api) => new Promise((resolve, reject) => {
     const worker = new Worker(threads + '/thread.js');
     worker.scriptUrl = url;
-    worker.onmessage = params => {
-        if(params.id){
+    worker.api = api;
+    worker.onmessage = async ({ data: params }) => {
+        if(params.id && !params.resultableAction){
             const { data, error, id } = params;
             if(id in actionStorage){
                 if(error) actionStorage[id].reject(error);
@@ -40,6 +44,19 @@ export default url => new Promise((resolve, reject) => {
             }
         } else if(params.action && params.action in actions){
             actions[params.action].call(worker, params)
+        } else if(params.resultableAction && params.resultableAction in actions){
+            const { resultableAction: action, id, args } = params;
+            try{
+                worker.postMessage({
+                    actionResult: await actions[action].call(worker, ...args),
+                    id,
+                })
+            } catch(e){
+                worker.postMessage({
+                    actionError: e.message,
+                    id,
+                })
+            }
         }
     };
     const id = createActionId();

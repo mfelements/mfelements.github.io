@@ -1,11 +1,31 @@
 'use strict';
 
-const module = {};
+const module = { actionStorage: Object.create(null) };
 
 importScripts('./rand.js');
 
-const { require, requireAsync } = (() => {
+const { require, requireAsync, API } = (() => {
     const rand = module.exports;
+
+    function generateActionStorageId(){
+        const id = rand();
+        if(id in module.actionStorage) return generateActionStorageId();
+        return id
+    }
+
+    const API = new Proxy(Object.create(null), {
+        get(_, name){
+            return (...args) => new Promise((resolve, reject) => {
+                const id = generateActionStorageId();
+                module.actionStorage[id] = { resolve, reject };
+                postMessage({
+                    resultableAction: 'apiCall',
+                    args: [{ name, args }],
+                    id
+                });
+            })
+        }
+    });
 
     const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
 
@@ -116,5 +136,5 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         return module.exports
     }
 
-    return { require, requireAsync }
+    return { require, requireAsync, API }
 })();
