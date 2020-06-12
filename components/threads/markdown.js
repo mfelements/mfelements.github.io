@@ -4,7 +4,23 @@ const options = [
     // options as list of arguments to init markdown parser
 ];
 
-requireAsync.call({ base: 'http://localhost' }, 'https://cdn.jsdelivr.net/npm/markdown-it@11.0.0/dist/markdown-it.min.js').then(v => v(...options)).then(markdown => {
+function _blankifyLinks(md){
+    const defaultRender = md.renderer.rules.link_open ||
+        ((tokens, idx, options, env, self) => self.renderToken(tokens, idx, options));
+    md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
+        const aIndex = tokens[idx].attrIndex('target');
+        if (aIndex < 0) tokens[idx].attrPush(['target', '_blank']);
+        else tokens[idx].attrs[aIndex][1] = '_blank';
+        return defaultRender(tokens, idx, options, env, self)
+    }
+}
+
+function onload(md){
+    _blankifyLinks(md);
+    return md
+}
+
+requireAsync.call({ base: 'http://localhost' }, 'https://cdn.jsdelivr.net/npm/markdown-it@11.0.0/dist/markdown-it.min.js').then(v => onload(v(...options))).then(markdown => {
     onmessage = async ({ data: { id, name, args } }) => {
         try{
             postMessage({ id, data: await markdown[name](...args) })
