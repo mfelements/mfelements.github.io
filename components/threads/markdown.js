@@ -13,5 +13,4 @@ requireAsync.call({ base: 'http://localhost' }, 'https://cdn.jsdelivr.net/npm/ma
         }
     }
     postMessage('MODULE_LOAD');
-    console.log({ markdown });
 }).catch(e => postMessage(e.message));
