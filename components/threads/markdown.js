@@ -1,8 +1,8 @@
 importScripts('./module_loader.js');
 
-const options = [
-    // options as list of arguments to init markdown parser
-];
+const options = [{
+    linkify: true,
+}];
 
 function _blankifyLinks(md){
     const defaultRender = md.renderer.rules.link_open ||
@@ -17,6 +17,7 @@ function _blankifyLinks(md){
 
 function onload(md){
     _blankifyLinks(md);
+    md.disable('image');
     return md
 }
 
