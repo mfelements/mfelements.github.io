@@ -62,7 +62,7 @@ async function waitForToken(){
         })}`;
         const childWin = window.open(authorizeUrl, '_blank', 'toolbar=no,scrollbars=no,resizable=yes');
         code = await waitForValue(() => localStorage.getItem('auth:code'), 500);
-        childWin.close()
+        try{ childWin.close() } catch(e){}
     }
     const authExpire = +localStorage.getItem('auth:expires');
     if(!token || (authExpire && (Date.now() / 1000) > (authExpire - 864e2))){
