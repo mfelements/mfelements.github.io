@@ -4,7 +4,7 @@ const module = { actionStorage: Object.create(null) };
 
 importScripts('./rand.js');
 
-const { require, requireAsync, API } = (() => {
+const { require, requireAsync, API, requestAuth } = (() => {
     const rand = module.exports;
 
     function generateActionStorageId(){
@@ -26,6 +26,18 @@ const { require, requireAsync, API } = (() => {
             })
         }
     });
+
+    function requestAuth(keys){
+        return new Promise((resolve, reject) => {
+            const id = generateActionStorageId();
+            module.actionStorage[id] = { resolve, reject };
+            postMessage({
+                resultableAction: 'requestAuth',
+                args: [ keys ],
+                id
+            });
+        })
+    }
 
     const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
 
@@ -136,5 +148,5 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         return module.exports
     }
 
-    return { require, requireAsync, API }
+    return { require, requireAsync, API, requestAuth }
 })();
