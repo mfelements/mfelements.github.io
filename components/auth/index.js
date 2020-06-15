@@ -8,6 +8,18 @@ const tokenUrl = oauthUrl + '/oauth/token';
 const userApiUrl = oauthUrl + '/api/user';
 export const loginUrlPath = new URL(oauthRedirectUrl).pathname;
 
+const dataToStorageKeys = {
+    date_of_birth: 'dateOfBirth',
+    email: 'email',
+    first_name: 'firstName',
+    id: 'id',
+    kyc_status: 'kycStatus',
+    last_name: 'lastName',
+    nick_name: 'nickName',
+    status: 'status',
+    title: 'title',
+}
+
 function buildQuery(data){
     let res = [];
     for(const i in data) res.push(`${encodeURIComponent(i)}=${encodeURIComponent(data[i] || '')}`);
@@ -75,4 +87,48 @@ async function waitForToken(){
         return { token: access_token, tokenType: token_type }
     }
     return { token, tokenType: localStorage.getItem('auth:tokenType') }
+}
+
+async function getUserData(){
+    try{
+        const { token, tokenType } = await waitForToken();
+        const data = await fetch(userApiUrl, {
+            method: 'GET',
+            headers: {
+                Authorization: `${tokenType} ${token}`,
+                Accept: 'application/json',
+            }
+        }).then(v => v.json());
+        const res = {};
+        for(const key in dataToStorageKeys){
+            res[dataToStorageKeys[key]] = data[key];
+            localStorage.setItem('auth:' + dataToStorageKeys[key], data[key]);
+        }
+        return res
+    } catch(e){
+        const res = {};
+        for(const key in dataToStorageKeys) res[dataToStorageKeys[key]] = localStorage.getItem('auth:' + dataToStorageKeys[key]);
+        if(!res.id) throw new Error('You need to connect to the Internet for the first login');
+        return res
+    }
+}
+
+async function getUserDataNative(){
+    const data = await getUserData();
+    data.verified = data.kycStatus === 'GREEN';
+    delete data.kycStatus;
+    return data
+}
+
+async function userAccept(keys){
+    //
+}
+
+export default async keys => {
+    const data = await getUserDataNative();
+    const res = {};
+    keys = keys.filter(v => v in data);
+    await userAccept(keys);
+    for(const key of keys) res[key] = data[key];
+    return res
 }
