@@ -1,5 +1,6 @@
 import { threads } from './paths.js'
 import { registerAction } from './api.js'
+import requestAuth from './auth/index.js'
 
 const actionStorage = Object.create(null);
 
@@ -29,6 +30,7 @@ const actions = {
     apiCall({ name, args }){
         return this.api[name](...args)
     },
+    requestAuth,
 }
 
 export default (url, api) => new Promise((resolve, reject) => {
