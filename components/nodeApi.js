@@ -1,0 +1,83 @@
+const nodes = [
+    'http://127.0.0.1/',
+],
+    nodeRefreshInterval = 10000;
+
+let currentNode = shuffleArray(nodes)[0];
+
+function rand(d){
+    const res = Math.random().toString(36).substring(2, 15);
+    return d ? res + rand(d - 1) : res
+}
+
+
+function shuffleArray(array){
+    const newarr = Array.from(array);
+    for (let i = newarr.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [newarr[i], newarr[j]] = [newarr[j], newarr[i]];
+    }
+    return newarr
+}
+
+async function selectNode(){
+    const startTime = Date.now();
+    const res = [];
+    const blockCounter = {};
+    for(const node of shuffleArray(nodes)) res.push(sendRequest(node, rand(2), 'getinfo').then(r => {
+        if(!r || !r.result) return null;
+        const { blocks } = r.result;
+        if(!blockCounter[blocks]) blockCounter[blocks] = 1;
+        else blockCounter[blocks]++;
+        r.requestTime = Date.now() - startTime;
+        r.node = node;
+        return r
+    }));
+    res = (await Promise.all(res)).filter(v => v);
+    const blockCountConsensus = Math.max(...Object.values(blockCounter));
+    res = res.filter(r => (r.result.blocks === blockCountConsensus));
+    res = res.sort((a, b) => (a.requestTime - b.requestTime));
+    console.log(res);
+    return res[0].node
+}
+
+async function refreshCurrentNode(){
+    currentNode = await selectNode()
+}
+
+async function sendRequest(node, id, method, params = []){
+    try{
+        return await fetch(node, {
+            method: 'POST',
+            body: JSON.stringify({
+                jsonrpc: '2.0',
+                method,
+                params,
+                id,
+            })
+        }).then(r => r.json())
+    } catch(e){
+        return null
+    }
+}
+
+refreshCurrentNode() && setInterval(refreshCurrentNode, nodeRefreshInterval);
+
+module.exports = new Proxy(Object.create(null), {
+    get(_, method){
+        if(!_[method]) Object.assign(_, {
+            async [method](...params){
+                const id = rand(12);
+                const data = await sendRequest(currentNode, id, method, params);
+                if(!data){
+                    await refreshCurrentNode();
+                    return _[method](...params)
+                }
+                if(data.error) throw new Error(data.error);
+                if(data.id !== id) throw new Error('System error: returned info does not match requested one');
+                return data.result
+            }
+        });
+        return _[method]
+    }
+})
