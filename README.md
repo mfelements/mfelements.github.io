@@ -1,6 +1,6 @@
 # mfelements.github.io
 
-**MFElements** is a Web UI Framework As A Service made for creating applications in uniform style Metapolis Freeland (ex Virtual State of Freeland: [https://freeland.land/](https://freeland.land/)).
+**MFElements** is a Web UI Platform As A Service made for creating applications in uniform style Metapolis Freeland (ex Virtual State of Freeland: [https://freeland.land/](https://freeland.land/)).
 
 # How it works?
 
