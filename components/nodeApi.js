@@ -20,6 +20,10 @@ function shuffleArray(array){
     return newarr
 }
 
+function getKeyByVal(obj, val){
+    for(const i in obj) if(obj[i] === val) return i
+}
+
 async function selectNode(){
     const startTime = Date.now();
     const res = [];
@@ -34,7 +38,8 @@ async function selectNode(){
         return r
     }));
     res = (await Promise.all(res)).filter(v => v);
-    const blockCountConsensus = Math.max(...Object.values(blockCounter));
+    const blockCountConsensusCount = Math.max(...Object.values(blockCounter));
+    const blockCountConsensus = +getKeyByVal(blockCounter, blockCountConsensusCount);
     res = res.filter(r => (r.result.blocks === blockCountConsensus));
     res = res.sort((a, b) => (a.requestTime - b.requestTime));
     console.log(res);
