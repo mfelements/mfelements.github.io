@@ -66,6 +66,12 @@ MFC.blockchainAPI = (() => {
 
     refreshCurrentNode() && setInterval(refreshCurrentNode, nodeRefreshInterval);
 
+    class BlockchainError extends Error{
+        constructor(error){
+            super(`${error.code}\n${error.message}`)
+        }
+    }
+
     return new Proxy(Object.create(null), {
         get(_, method){
             if(!_[method]) Object.assign(_, {
@@ -76,7 +82,7 @@ MFC.blockchainAPI = (() => {
                         await refreshCurrentNode();
                         return _[method](...params)
                     }
-                    if(data.error) throw new Error(data.error);
+                    if(data.error) throw new BlockchainError(data.error);
                     if(data.id !== id) throw new Error('System error: returned info does not match requested one');
                     return data.result
                 }
