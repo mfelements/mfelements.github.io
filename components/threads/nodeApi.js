@@ -24,7 +24,7 @@ MFC.blockchainAPI = (() => {
 
     async function selectNode(){
         const startTime = Date.now();
-        const res = [];
+        let res = [];
         const blockCounter = {};
         for(const node of shuffleArray(nodes)) res.push(sendRequest(node, rand(2), 'getinfo').then(r => {
             if(!r || !r.result) return null;
