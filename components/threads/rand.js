@@ -1,1 +1,4 @@
-module.exports = () => Math.random().toString(36).substring(2, 15);
+module.exports = d => {
+    const res = Math.random().toString(36).substring(2, 15);
+    return d ? res + rand(d - 1) : res
+}
