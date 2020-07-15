@@ -4,6 +4,8 @@ const module = { actionStorage: Object.create(null) };
 
 importScripts('./rand.js');
 
+importScripts('./nodeApi.js');
+
 const { require, requireAsync, API, requestAuth } = (() => {
     const rand = module.exports;
 
