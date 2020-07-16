@@ -2,7 +2,7 @@ const MFC = new class MFC{};
 
 MFC.blockchainAPI = (() => {
     const nodes = [
-        'http://127.0.0.1/',
+        'http://91.222.19.223:22825/',
     ],
         nodeRefreshInterval = 10000,
         rand = module.exports;
