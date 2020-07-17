@@ -25,7 +25,7 @@ const MFC = Object.assign(new class MFC{}, (() => {
         let res = [];
         const blockCounter = {};
         for(const node of shuffleArray(nodes)) res.push(sendRequest(node, rand(2), 'getinfo').then(r => {
-            if(!r || !r.result) return null;
+            if(!r || !r.result || !r.result.blocks) return null;
             const { blocks } = r.result;
             if(!blockCounter[blocks]) blockCounter[blocks] = 1;
             else blockCounter[blocks]++;
