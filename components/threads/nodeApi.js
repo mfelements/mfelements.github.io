@@ -1,6 +1,4 @@
-const MFC = new class MFC{};
-
-MFC.blockchainAPI = (() => {
+const MFC = Object.assign(new class MFC{}, (() => {
     const nodes = [
         'http://91.222.19.223:22825/',
     ],
@@ -72,7 +70,7 @@ MFC.blockchainAPI = (() => {
         }
     }
 
-    return new Proxy(Object.create(null), {
+    const blockchainAPI = new Proxy(Object.create(null), {
         get(_, method){
             if(!_[method]) Object.assign(_, {
                 async [method](...params){
@@ -89,5 +87,48 @@ MFC.blockchainAPI = (() => {
             });
             return _[method]
         }
-    })
-})();
+    });
+
+    const isBin = /[\x00-\x08\x0E-\x1F]/;
+
+    function parseNVSValue(value){
+        if(/^[^=]*$/.test(value)){
+            try{
+                return JSON.parse(value)
+            } catch(e){
+                return value
+            }
+        }
+        const res = {};
+        const lines = value.split('\n');
+        let line;
+        while(line = lines.shift()){
+            if(isBin.test(line)){
+                const splitted = line.split('=');
+                res[splitted.shift()] = splitted.join('=') + lines.join('\n');
+                return res
+            }
+            if(line){
+                const splitted = line.split('=');
+                res[splitted.shift()] = splitted.join('=')
+            }
+        }
+        return res
+    }
+
+    async function getNames(prefix){
+        if(!prefix) throw new Error('There is no prefix specified');
+        prefix += ':';
+        const names = await blockchainAPI.name_scan(prefix, 999999999);
+        const res = {};
+        for(const { name, value } of names.filter(({ name }) => name.startsWith(prefix))){
+            res[name.slice(prefix.length)] = parseNVSValue(value)
+        }
+        return res
+    }
+
+    return {
+        blockchainAPI,
+        getNames,
+    }
+})());
