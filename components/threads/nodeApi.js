@@ -3,6 +3,7 @@ const MFC = Object.assign(new class MFC{}, (() => {
         'http://91.222.19.223:22825/',
     ],
         nodeRefreshInterval = 10000,
+        requestTimeout = 2000,
         rand = module.exports;
 
     let currentNode = shuffleArray(nodes)[0];
@@ -24,7 +25,7 @@ const MFC = Object.assign(new class MFC{}, (() => {
         const startTime = Date.now();
         let res = [];
         const blockCounter = {};
-        for(const node of shuffleArray(nodes)) res.push(sendRequest(node, rand(2), 'getinfo').then(r => {
+        for(const node of shuffleArray(nodes)) res.push(sendRequest(node, rand(2), 'getinfo', requestTimeout).then(r => {
             if(!r || !r.result || !r.result.blocks) return null;
             const { blocks } = r.result;
             if(!blockCounter[blocks]) blockCounter[blocks] = 1;
@@ -45,7 +46,11 @@ const MFC = Object.assign(new class MFC{}, (() => {
         try{ currentNode = await selectNode() } catch(e){}
     }
 
-    async function sendRequest(node, id, method, params = []){
+    async function sendRequest(node, id, method, timeout, params = []){
+        const controller = new AbortController;
+        const { signal } = controller;
+        let pointer;
+        if(timeout !== null) pointer = setTimeout(() => controller.abort(), timeout);
         try{
             return await fetch(node, {
                 method: 'POST',
@@ -54,8 +59,12 @@ const MFC = Object.assign(new class MFC{}, (() => {
                     method,
                     params,
                     id,
-                })
-            }).then(r => r.json())
+                }),
+                signal,
+            }).then(r => {
+                if(timeout !== null) clearTimeout(pointer);
+                return r.json()
+            })
         } catch(e){
             return null
         }
@@ -74,7 +83,7 @@ const MFC = Object.assign(new class MFC{}, (() => {
             if(!_[method]) Object.assign(_, {
                 async [method](...params){
                     const id = rand(12);
-                    const data = await sendRequest(currentNode, id, method, params);
+                    const data = await sendRequest(currentNode, id, method, requestTimeout, params);
                     if(!data){
                         await refreshCurrentNode();
                         return _[method](...params)
