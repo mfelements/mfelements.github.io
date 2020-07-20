@@ -38,12 +38,11 @@ const MFC = Object.assign(new class MFC{}, (() => {
         const blockCountConsensus = +getKeyByVal(blockCounter, blockCountConsensusCount);
         res = res.filter(r => (r.result.blocks === blockCountConsensus));
         res = res.sort((a, b) => (a.requestTime - b.requestTime));
-        console.log(res);
         return res[0].node
     }
 
     async function refreshCurrentNode(){
-        currentNode = await selectNode()
+        try{ currentNode = await selectNode() } catch(e){}
     }
 
     async function sendRequest(node, id, method, params = []){
