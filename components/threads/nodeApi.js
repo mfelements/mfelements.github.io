@@ -1,6 +1,6 @@
 const MFC = Object.assign(new class MFC{}, (() => {
     const nodes = [
-        'http://91.222.19.223:22825/',
+        'https://mfc-node-001.bassteam.ml:22825/',
     ],
         nodeRefreshInterval = 10000,
         requestTimeout = 2000,
