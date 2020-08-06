@@ -41,10 +41,12 @@ export default function parseElement(api, element){
          * the same as above. And ONLY when we set state asynchronously, both
          * the old generated will be erased and new generated will be applied
          */
-        app.state.generated = null;
         app.setState({
+            generated: null,
+        });
+        setTimeout(() => app.setState({
             generated: html`<${elements.page} ...${element} api=${api}/>`,
-        })
+        }))
     }
     return html`<${elements[element.type]} ...${element} api=${api} page=${this}/>`
 }
