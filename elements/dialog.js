@@ -6,8 +6,6 @@ export default class Dialog extends Component{
     constructor(props){
         super(props);
     }
-    componentDidMount(){
-    }
     render(){
         const { text, btnText, buttons, api, page } = this.props;
         const { open } = this.state;
