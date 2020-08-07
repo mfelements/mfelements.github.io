@@ -63,9 +63,6 @@ export default class API{
                         method: data.length ? 'POST' : 'GET',
                         mode: 'cors',
                         cache: 'no-cache',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
                         redirect: 'follow',
                     };
                     if(data.length) options.body = JSON.stringify(data);

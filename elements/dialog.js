@@ -20,7 +20,7 @@ export default class Dialog extends Component{
                         </>
                     `)}</>
                 </>
-                <div class=${'dialog-bg'} onclick=${() => this.setState({ open: false })}/>
+                <div class=dialog-bg onclick=${() => this.setState({ open: false })}/>
             </>
         `
     }
