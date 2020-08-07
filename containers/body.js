@@ -32,7 +32,8 @@ export default class Body extends Component{
         updateBody()
     }
     componentWillUnmount(){
-        delete elements[this.myIndex]
+        delete elements[this.myIndex];
+        updateBody()
     }
     render(){
         return null

@@ -27,7 +27,8 @@ export default class Head extends Component{
         updateHead()
     }
     componentWillUnmount(){
-        delete elements[this.myIndex]
+        delete elements[this.myIndex];
+        updateHead()
     }
     render(){
         return null
