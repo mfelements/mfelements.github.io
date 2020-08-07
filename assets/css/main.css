@@ -99,6 +99,49 @@ div:not([class]) > *:first-child{
     padding-bottom: calc(100% / var(--ratio-w) * var(--ratio-h));
 }
 
+.dialog-bg{
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -o-appearance: none;
+    appearance: none;
+    z-index: 1;
+    position: fixed;
+    top: 0;
+    left: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+    pointer-events: none;
+    cursor: pointer;
+    opacity: 0;
+    transition: all var(--transition-speed) cubic-bezier(0.5, -0.5, 0.25, 1.5);
+}
+
+dialog[open] + .dialog-bg{
+    pointer-events: auto;
+    opacity: 0.25;
+}
+
+dialog:not([open]){
+    display: block;
+    top: -100%;
+}
+
+dialog{
+    z-index: 2;
+    display: block;
+    border-radius: 2rem;
+    background: #f7f7f7;
+    box-shadow: 0 1rem 1rem rgba(0, 0, 0, 0.25);
+    border: none;
+    top: 50%;
+    width: calc(100% - 4rem);
+    min-width: 288px;
+    transform: translate(0, -50%);
+    transition: all var(--transition-speed) cubic-bezier(0.6, -0.5, 0.25, 1.5);
+}
+
 /* mobile styles */
 
 @media (max-width: 520px) {
