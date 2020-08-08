@@ -1,4 +1,6 @@
-import AllowedNames from './typings/allowedNames'
+import { allowedNames } from './cjs'
+
+type AllowedNames = typeof allowedNames
 
 type AsyncConsole = {
     [x in AllowedNames]: (typeof console)[x]
@@ -12,8 +14,8 @@ type CallbackVoidFunction<A> = (...args: A[]) => void
 declare function _<F extends AsyncFunction<T, A>, T, A>(asyncF: (console: AsyncConsole) => F): F
 declare function _<F extends AsyncVoidFunction<A>, A>(asyncF: (console: AsyncConsole) => F): F
 
-export function callbackLogger<F extends CallbackFunction<A, T>, A, T>(asyncF: (console: AsyncConsole) => F): F
-export function callbackLogger<F extends CallbackVoidFunction<A>, A>(asyncF: (console: AsyncConsole) => F): F
+export function callbackLogger<F extends CallbackFunction<A, T>, A, T>(asyncF: (console: AsyncConsole) => F): Promise<F>
+export function callbackLogger<F extends CallbackVoidFunction<A>, A>(asyncF: (console: AsyncConsole) => F): Promise<F>
 
 export default _
 
