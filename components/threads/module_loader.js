@@ -8,6 +8,8 @@ importScripts('./nodeApi.js');
 
 const { require, requireAsync, API, requestAuth } = (() => {
     const rand = module.exports;
+    importScripts('../logger/cjs.js');
+    const asyncLogger = module.exports.default;
 
     function generateActionStorageId(){
         const id = rand();
@@ -150,5 +152,10 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         return module.exports
     }
 
-    return { require, requireAsync, API, requestAuth }
+    return {
+        require: asyncLogger(_ => require),
+        requireAsync: asyncLogger(_ => requireAsync),
+        requestAuth: asyncLogger(_ => requestAuth),
+        API,
+    }
 })();
