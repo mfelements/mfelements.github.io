@@ -3,8 +3,28 @@ import { loginUrlPath } from '../components/auth/index.js'
 import App from './app.js'
 import Login from './login.js'
 
-const { body } = document,
-    elements = [ html`<${ loginUrlPath === location.pathname ? Login : App }/>` ];
+const { body } = document;
+
+export const errors = [];
+
+export let updateErrors = () => {};
+
+export const elements = [
+    html`<${ loginUrlPath === location.pathname ? Login : App }/>`,
+    html`<${class Errors extends Component{
+        componentDidMount(){
+            updateErrors = this.forceUpdate.bind(this)
+        }
+        componentWillUnmount(){
+            updateErrors = () => {}
+        }
+        render(){
+            return html`<div class=error-container>${errors.filter(v => v !== undefined).map(v => {
+                return html`<pre>${v}</pre>`
+            })}</div>`
+        }
+    }}/>`,
+];
 
 body.innerHTML = '';
 
