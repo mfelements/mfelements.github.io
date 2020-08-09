@@ -121,35 +121,47 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
     }
 
     function require(url){
-        url = new URL(url, this.base).href;
-        if(url in moduleStorage) return moduleStorage[url];
-        const src = downloadSync(url);
-        const { keys, args, module, self } = argsAndExport(url);
-        const f = new Function(...keys, `${overrides}\n${src}`);
-        const reqIdx = keys.indexOf('require');
-        const aReqIdx = keys.indexOf('requireAsync');
-        const that = { base: url };
-        args[reqIdx] = require.bind(that);
-        args[aReqIdx] = requireAsync.bind(that);
-        f.call(self, ...args);
-        moduleStorage[url] = module.exports;
-        return module.exports
+        try{
+            url = new URL(url, this.base).href;
+            if(url in moduleStorage) return moduleStorage[url];
+            const src = downloadSync(url);
+            const { keys, args, module, self } = argsAndExport(url);
+            const f = new Function(...keys, `${overrides}\n${src}`);
+            const reqIdx = keys.indexOf('require');
+            const aReqIdx = keys.indexOf('requireAsync');
+            const that = { base: url };
+            args[reqIdx] = require.bind(that);
+            args[aReqIdx] = requireAsync.bind(that);
+            f.call(self, ...args);
+            moduleStorage[url] = module.exports;
+            return module.exports
+        } catch(e){
+            postMessage({
+                showError: `Cannot require module ${url}:\n${e.name}: ${e.message}`,
+            })
+        }
     }
 
     async function requireAsync(url){
-        url = new URL(url, this.base).href;
-        if(url in moduleStorage) return moduleStorage[url];
-        const src = await fetch(url).then(r => r.text());
-        const { keys, args, module, self } = argsAndExport(url);
-        const f = new AsyncFunction(...keys, `${overrides};\n${src}`);
-        const reqIdx = keys.indexOf('require');
-        const aReqIdx = keys.indexOf('requireAsync');
-        const that = { base: url };
-        args[reqIdx] = require.bind(that);
-        args[aReqIdx] = requireAsync.bind(that);
-        await f.call(self, ...args);
-        moduleStorage[url] = module.exports;
-        return module.exports
+        try{
+            url = new URL(url, this.base).href;
+            if(url in moduleStorage) return moduleStorage[url];
+            const src = await fetch(url).then(r => r.text());
+            const { keys, args, module, self } = argsAndExport(url);
+            const f = new AsyncFunction(...keys, `${overrides};\n${src}`);
+            const reqIdx = keys.indexOf('require');
+            const aReqIdx = keys.indexOf('requireAsync');
+            const that = { base: url };
+            args[reqIdx] = require.bind(that);
+            args[aReqIdx] = requireAsync.bind(that);
+            await f.call(self, ...args);
+            moduleStorage[url] = module.exports;
+            return module.exports
+        } catch(e){
+            postMessage({
+                showError: `Cannot require module ${url}:\n${e.name}: ${e.message}`,
+            })
+        }
     }
 
     return {

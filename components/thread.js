@@ -1,6 +1,7 @@
 import { threads } from './paths.js'
 import { registerAction } from './api.js'
 import requestAuth from './auth/index.js'
+import logError from './errorMessage.js'
 
 const actionStorage = Object.create(null);
 
@@ -59,6 +60,8 @@ export default (url, api) => new Promise((resolve, reject) => {
                     id,
                 })
             }
+        } else if(params.showError){
+            logError({ message: params.showError })
         }
     };
     const id = createActionId();
