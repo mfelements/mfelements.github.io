@@ -10,7 +10,10 @@ class TextLoader extends Component{
 }
 
 class Text extends Component{
-    state = {}
+    constructor(props){
+        super(props);
+        this.state = {}
+    }
     componentDidMount(props = this.props){
         let { t } = props;
         t = '' + t;

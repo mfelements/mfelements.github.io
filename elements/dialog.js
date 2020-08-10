@@ -3,9 +3,6 @@ import Body from '../containers/body.js'
 import Button from './button.js'
 
 export default class Dialog extends Component{
-    constructor(props){
-        super(props);
-    }
     render(){
         const { text, btnText, buttons, api, page } = this.props;
         const { open } = this.state;
