@@ -2,6 +2,8 @@
 
 const module = { actionStorage: Object.create(null) };
 
+const globalThis = this;
+
 importScripts('./rand.js');
 
 importScripts('./nodeApi.js');
@@ -75,6 +77,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         'terminate',
         'importScripts',
         'globalThis',
+        'Babel',
     ];
 
     function downloadSync(url){
@@ -120,11 +123,40 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         }
     }
 
+    let transformSrc;
+
+    function getTransformFunc(){
+        if(!transformSrc){
+            const { Babel } = globalThis;
+            if(Babel){
+                transformSrc = src => {
+                    const { code } = Babel.transform(src, {
+                        presets: [
+                            Babel.availablePresets.es2016,
+                        ],
+                        plugins: [
+                            Babel.availablePlugins['proposal-class-properties'],
+                            Babel.availablePlugins['proposal-private-methods'],
+                            Babel.availablePlugins['syntax-top-level-await'],
+                        ],
+                        ast: false,
+                        sourceMaps: false,
+                    });
+                    console.log({ code });
+                    return code
+                }
+            } else {
+                transformSrc = s => s
+            }
+        }
+        return transformSrc
+    }
+
     function require(url){
         try{
             url = new URL(url, this.base).href;
             if(url in moduleStorage) return moduleStorage[url];
-            const src = downloadSync(url);
+            const src = getTransformFunc()(downloadSync(url));
             const { keys, args, module, self } = argsAndExport(url);
             const f = new Function(...keys, `${overrides}\n${src}`);
             const reqIdx = keys.indexOf('require');
@@ -146,7 +178,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         try{
             url = new URL(url, this.base).href;
             if(url in moduleStorage) return moduleStorage[url];
-            const src = await fetch(url).then(r => r.text());
+            const src = getTransformFunc()(await fetch(url).then(r => r.text()));
             const { keys, args, module, self } = argsAndExport(url);
             const f = new AsyncFunction(...keys, `${overrides};\n${src}`);
             const reqIdx = keys.indexOf('require');

@@ -1,3 +1,4 @@
+importScripts('https://unpkg.com/@babel/standalone/babel.min.js');
 importScripts('./module_loader.js');
 
 const registerAction = (() => {
