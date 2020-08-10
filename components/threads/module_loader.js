@@ -132,7 +132,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                 transformSrc = src => {
                     const { code } = Babel.transform(src, {
                         presets: [
-                            Babel.availablePresets.es2016,
+                            Babel.availablePresets.es2017,
                         ],
                         plugins: [
                             Babel.availablePlugins['proposal-class-properties'],
