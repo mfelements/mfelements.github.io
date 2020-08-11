@@ -1,4 +1,4 @@
-importScripts('./module_loader.js');
+importScripts('../langs/js/index.js');
 
 const options = [{
     linkify: true,

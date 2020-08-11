@@ -7,17 +7,18 @@ const base = getApiUrl();
 
 export default class Module extends Component{
     componentDidMount(){
-        const { url, api } = this.props;
+        const { url, api, lang, langv } = this.props;
         this.api = api;
         this.moduleUrl = new URL(url, base).href;
-        createThread(this.moduleUrl, api).catch(errorLog)
+        createThread(this.moduleUrl, api, lang, langv).catch(errorLog)
     }
     shouldComponentUpdate(props){
-        const nextUrl = new URL(props.url, base).href;
+        const { url, lang, langv } = props;
+        const nextUrl = new URL(url, base).href;
         if(this.moduleUrl !== nextUrl){
             unregisterActions(this.moduleUrl);
             this.moduleUrl = nextUrl;
-            createThread(nextUrl, this.api).catch(errorLog)
+            createThread(nextUrl, this.api, lang, langv).catch(errorLog)
         }
         return false
     }

@@ -34,7 +34,7 @@ const actions = {
     requestAuth,
 }
 
-export default (url, api) => new Promise((resolve, reject) => {
+export default (url, api, lang, langv) => new Promise((resolve, reject) => {
     const worker = new Worker(threads + '/thread.js');
     worker.scriptUrl = url;
     worker.api = api;
@@ -69,5 +69,7 @@ export default (url, api) => new Promise((resolve, reject) => {
     worker.postMessage({
         requireScript: url,
         id,
+        lang,
+        langv,
     })
 })
