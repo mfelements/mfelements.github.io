@@ -36,6 +36,5 @@ importScripts(threadsRelativePath + 'lua.js');
 
 async function requireAsync(url){
     const [ luaMain, src ] = await Promise.all([luaRuntime, fetch(url).then(r => r.text())]);
-    console.warn({ luaMain, src });
     luaMain(src)
 }
