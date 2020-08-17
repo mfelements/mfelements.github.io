@@ -1545,7 +1545,7 @@ function integrateWasmJS() {
   var method = 'native-wasm';
 
   var wasmTextFile = 'lua.wast';
-  var wasmBinaryFile = 'lua.wasm';
+  var wasmBinaryFile = '../langs/lua-5.4.0/uncompressed/lua.wasm';
   var asmjsCodeFile = 'lua.temp.asm.js';
 
   if (!isDataURI(wasmTextFile)) {
