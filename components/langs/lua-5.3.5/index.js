@@ -1,1 +1,0 @@
-throw new Error('Lua isn\'t supported now')

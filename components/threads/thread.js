@@ -45,15 +45,14 @@ const registerAction = (() => {
             const availableMin = availableMaj.min.filter(({ min: _ }) => _ === min)[0];
             if(!availableMin) throw e;
             if(!rel) rel = Math.max(...availableMin.rel);
-            if(!availableMin.rel.indexOf(rel) === -1) throw e;
+            if(availableMin.rel.indexOf(rel) === -1) throw e;
             return `${this.name}-${availableMaj.maj}.${availableMin.min}.${rel}`
         }
     }
 
     for(const lang of [
         'js',
-        'lua-5.3.5',
-        'lua-5.4.0',
+        'lua-5.3.4',
     ]) new Lang(lang);
 
     langsSupported.default = langsSupported.js;
