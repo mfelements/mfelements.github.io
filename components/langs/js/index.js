@@ -50,8 +50,7 @@ const { require, requireAsync, API, requestAuth } = (() => {
     const argsName = '_' + rand(),
         srcName = '_' + rand();
 
-    const overrides = `'use strict';
-class Function{
+    const overrides = `class Function{
     constructor(...${argsName}){
         const ${srcName} = ${argsName}.pop();
         return eval('(function(' + ${argsName}.join(', ') + '){\\n' + ${srcName} + '\\n})')
@@ -64,10 +63,10 @@ class AsyncFunction{
     }
 }
 Object.defineProperty(Object.getPrototypeOf(() => {}), 'constructor', { value: Function });
-Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { value: AsyncFunction });
-    `
+Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { value: AsyncFunction });`;
 
-    const moduleStorage = Object.create(null);
+    const syncModuleStorage = Object.create(null);
+    const asyncModuleStorage = Object.create(null);
 
     const restrictedNames = [
         'onmessage',
@@ -125,22 +124,27 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
 
     let transformSrc;
 
-    function getTransformFunc(){
+    function getTransformFunc(isAsync){
         if(!transformSrc){
             const { Babel } = globalThis;
             if(Babel){
-                transformSrc = src => {
+                transformSrc = (src, filename) => {
+                    const plugins = [
+                        Babel.availablePlugins['proposal-class-properties'],
+                        Babel.availablePlugins['proposal-private-methods'],
+                    ];
+                    if(isAsync) plugins.push(
+                        Babel.availablePlugins['syntax-top-level-await'],
+                        Babel.availablePlugins['es6-modules-mfwc-stage0']
+                    );
                     const { code } = Babel.transform(src, {
                         presets: [
                             Babel.availablePresets.es2017,
                         ],
-                        plugins: [
-                            Babel.availablePlugins['proposal-class-properties'],
-                            Babel.availablePlugins['proposal-private-methods'],
-                            Babel.availablePlugins['syntax-top-level-await'],
-                        ],
+                        plugins,
                         ast: false,
-                        sourceMaps: false,
+                        sourceMaps: 'inline',
+                        filename,
                     });
                     console.log({ code });
                     return code
@@ -155,8 +159,8 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
     function require(url){
         try{
             url = new URL(url, this.base).href;
-            if(url in moduleStorage) return moduleStorage[url];
-            const src = getTransformFunc()(downloadSync(url));
+            if(url in syncModuleStorage) return syncModuleStorage[url];
+            const src = getTransformFunc()(downloadSync(url), url);
             const { keys, args, module, self } = argsAndExport(url);
             const f = new Function(...keys, `${overrides}\n${src}`);
             const reqIdx = keys.indexOf('require');
@@ -165,7 +169,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             args[reqIdx] = require.bind(that);
             args[aReqIdx] = requireAsync.bind(that);
             f.call(self, ...args);
-            moduleStorage[url] = module.exports;
+            syncModuleStorage[url] = module.exports;
             return module.exports
         } catch(e){
             postMessage({
@@ -177,18 +181,19 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
     async function requireAsync(url){
         try{
             url = new URL(url, this.base).href;
-            if(url in moduleStorage) return moduleStorage[url];
-            const src = getTransformFunc()(await fetch(url).then(r => r.text()));
-            const { keys, args, module, self } = argsAndExport(url);
-            const f = new AsyncFunction(...keys, `${overrides};\n${src}`);
-            const reqIdx = keys.indexOf('require');
-            const aReqIdx = keys.indexOf('requireAsync');
-            const that = { base: url };
-            args[reqIdx] = require.bind(that);
-            args[aReqIdx] = requireAsync.bind(that);
-            await f.call(self, ...args);
-            moduleStorage[url] = module.exports;
-            return module.exports
+            if(url in asyncModuleStorage) return asyncModuleStorage[url];
+            return asyncModuleStorage[url] = (async () => {
+                const src = getTransformFunc(true)(await fetch(url).then(r => r.text()), url);
+                const { keys, args, module, self } = argsAndExport(url);
+                const f = new AsyncFunction(...keys, `${overrides}\n${src}`);
+                const reqIdx = keys.indexOf('require');
+                const aReqIdx = keys.indexOf('requireAsync');
+                const that = { base: url };
+                args[reqIdx] = require.bind(that);
+                args[aReqIdx] = requireAsync.bind(that);
+                await f.call(self, ...args);
+                return module.exports
+            })()
         } catch(e){
             postMessage({
                 showError: `Cannot require module ${url}:\n${e.name}: ${e.message}`,

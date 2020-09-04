@@ -1,4 +1,5 @@
 importScripts('https://unpkg.com/@babel/standalone/babel.min.js');
+importScripts('https://cdn.jsdelivr.net/gh/mfelements/es6-modules-mfwc@stage0/worker.min.js');
 
 const registerAction = (() => {
     // to prevent variable leaking to module scope
