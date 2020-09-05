@@ -98,6 +98,8 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         }
     }
 
+    const importMetaKey = argsName + '_importMeta';
+
     function argsAndExport(__filename){
         const __dirname = dirname(__filename);
         const exports = {};
@@ -110,6 +112,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             requireAsync,
             module,
             exports,
+            [importMetaKey]: { url: __filename, provider: { name: 'requireAsync' } },
         });
         args.self = args;
         const keys = Object.keys(args);
@@ -188,14 +191,16 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             url = new URL(url, this.base).href;
             if(url in asyncModuleStorage) return asyncModuleStorage[url];
             return asyncModuleStorage[url] = (async () => {
-                const src = getTransformFunc(true)(await fetch(url).then(r => r.text()), transformUrlToFile(url));
+                const src = getTransformFunc(true)(`${JSON.stringify(importMetaKey)};\n${await fetch(url).then(r => r.text())}`, transformUrlToFile(url));
                 const { keys, args, module, self } = argsAndExport(url);
                 const f = new AsyncFunction(...keys, `${overrides}\n${src}`);
                 const reqIdx = keys.indexOf('require');
                 const aReqIdx = keys.indexOf('requireAsync');
+                const importMetaIdx = keys.indexOf(importMetaKey);
                 const that = { base: url };
                 args[reqIdx] = require.bind(that);
                 args[aReqIdx] = requireAsync.bind(that);
+                args[importMetaIdx].provider.raw = args[aReqIdx];
                 await f.call(self, ...args);
                 return module.exports
             })()
