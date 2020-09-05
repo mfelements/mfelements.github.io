@@ -156,11 +156,16 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         return transformSrc
     }
 
+    function transformUrlToFile(a){
+        const url = new URL(a);
+        return '/' + url.host + url.pathname + url.search
+    }    
+
     function require(url){
         try{
             url = new URL(url, this.base).href;
             if(url in syncModuleStorage) return syncModuleStorage[url];
-            const src = getTransformFunc()(downloadSync(url), url);
+            const src = getTransformFunc()(downloadSync(url), transformUrlToFile(url));
             const { keys, args, module, self } = argsAndExport(url);
             const f = new Function(...keys, `${overrides}\n${src}`);
             const reqIdx = keys.indexOf('require');
@@ -183,7 +188,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             url = new URL(url, this.base).href;
             if(url in asyncModuleStorage) return asyncModuleStorage[url];
             return asyncModuleStorage[url] = (async () => {
-                const src = getTransformFunc(true)(await fetch(url).then(r => r.text()), url);
+                const src = getTransformFunc(true)(await fetch(url).then(r => r.text()), transformUrlToFile(url));
                 const { keys, args, module, self } = argsAndExport(url);
                 const f = new AsyncFunction(...keys, `${overrides}\n${src}`);
                 const reqIdx = keys.indexOf('require');
