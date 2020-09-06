@@ -191,7 +191,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             url = new URL(url, this.base).href;
             if(url in asyncModuleStorage) return asyncModuleStorage[url];
             return asyncModuleStorage[url] = (async () => {
-                const src = getTransformFunc(true)(`${JSON.stringify(importMetaKey)};\n${await fetch(url).then(r => r.text())}`, transformUrlToFile(url));
+                const src = getTransformFunc(true)(`${await fetch(url).then(r => r.text())}\n;${JSON.stringify(importMetaKey)}`, transformUrlToFile(url));
                 const { keys, args, module, self } = argsAndExport(url);
                 const f = new AsyncFunction(...keys, `${overrides}\n${src}`);
                 const reqIdx = keys.indexOf('require');
