@@ -19,6 +19,12 @@ const { require, requireAsync, API, requestAuth } = (() => {
         return id
     }
 
+    function namedObject(name){
+        const obj = Object.create(null);
+        Object.defineProperty(obj, Symbol.toStringTag, { value: name });
+        return obj
+    }
+
     const API = new Proxy(Object.create(null), {
         get(_, name){
             return (...args) => new Promise((resolve, reject) => {
@@ -102,7 +108,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
 
     function argsAndExport(__filename){
         const __dirname = dirname(__filename);
-        const exports = {};
+        const exports = namedObject('Module');
         const module = { exports };
         const args = Object.assign(Object.create(ModuleScope.prototype), {
             ...restrictedNames.reduce((o, p) => { if(typeof o !== 'object') o = { [p]: undefined }; o[p] = undefined; return o }),
@@ -112,7 +118,12 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             requireAsync,
             module,
             exports,
-            [importMetaKey]: { url: __filename, provider: { name: 'requireAsync' } },
+            [importMetaKey]: Object.assign(namedObject('import.meta'), {
+                url: __filename,
+                provider: {
+                    name: 'requireAsync'
+                },
+            }),
         });
         args.self = args;
         const keys = Object.keys(args);
