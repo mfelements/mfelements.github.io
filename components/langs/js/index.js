@@ -179,7 +179,8 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         try{
             url = new URL(url, this.base).href;
             if(url in syncModuleStorage) return syncModuleStorage[url];
-            const src = getTransformFunc()(downloadSync(url), transformUrlToFile(url));
+            let src = downloadSync(url);
+            if(!this.skipTransform) src = getTransformFunc()(src, transformUrlToFile(url));
             const { keys, args, module, self } = argsAndExport(url);
             const f = new Function(...keys, `${overrides}\n${src}`);
             const reqIdx = keys.indexOf('require');
@@ -202,7 +203,8 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             url = new URL(url, this.base).href;
             if(url in asyncModuleStorage) return asyncModuleStorage[url];
             return asyncModuleStorage[url] = (async () => {
-                const src = getTransformFunc(true)(`${await fetch(url).then(r => r.text())}\n;${JSON.stringify(importMetaKey)}`, transformUrlToFile(url));
+                let src = await fetch(url).then(r => r.text());
+                if(!this.skipTransform) src = getTransformFunc(true)(`${src}\n;${JSON.stringify(importMetaKey)}`, transformUrlToFile(url));
                 const { keys, args, module, self } = argsAndExport(url);
                 const f = new AsyncFunction(...keys, `${overrides}\n${src}`);
                 const reqIdx = keys.indexOf('require');
