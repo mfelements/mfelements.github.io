@@ -6,12 +6,17 @@ const globalThis = this;
 
 importScripts('./rand.js');
 
-importScripts('./nodeApi.js');
-
-const { require, requireAsync, API, requestAuth } = (() => {
+const { require, requireAsync, API, requestAuth, MFC } = (() => {
     const rand = module.exports;
+
     importScripts('../logger/cjs.js');
-    const asyncLogger = module.exports.default;
+    const { default: asyncLogger, syncLogger } = module.exports;
+
+    importScripts('./electrumAPI.js');
+    const electrumX = module.exports;
+
+    const MFC = namedObject('MFC');
+    MFC.electrumX = electrumX(rand, asyncLogger);
 
     function generateActionStorageId(){
         const id = rand();
@@ -229,6 +234,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         requireAsync: asyncLogger(_ => requireAsync),
         requestAuth: asyncLogger(_ => requestAuth),
         API,
+        MFC,
     }
 })();
 
