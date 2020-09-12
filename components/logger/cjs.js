@@ -99,23 +99,27 @@ const additional = {};
 
 module.exports = Object.assign(additional, {
     default(asyncFN){
-        return async function(...args){
-            const console = new AsyncConsole;
-            const targetF = asyncFN(console);
-            console[_name] = targetF.name;
-            const res = await targetF.apply(this, args);
-            console.log('return:', res);
-            console.end();
-            return res
-        }
+        const console = new AsyncConsole;
+        const targetF = asyncFN(console);
+        console[_name] = targetF.name;
+        return {
+            async [targetF.name](...args){
+                const res = await targetF.apply(this, args);
+                console.log('return:', res);
+                console.end();
+                return res
+            }
+        }[targetF.name]
     },
     callbackLogger(asyncFN){
-        return async function(...args){
-            const console = new CallbackConsole;
-            const targetF = asyncFN(console);
-            console[_name] = targetF.name;
-            return targetF.apply(this, args)
-        }
+        const console = new CallbackConsole;
+        const targetF = asyncFN(console);
+        console[_name] = targetF.name;
+        return {
+            async [targetF.name](...args){
+                return targetF.apply(this, args)
+            }
+        }[targetF.name]
     },
     withName(name, f){
         return Object.defineProperty(f, 'name', { value: name })
