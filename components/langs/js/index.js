@@ -185,7 +185,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             const f = new Function(...keys, `${overrides}\n${src}`);
             const reqIdx = keys.indexOf('require');
             const aReqIdx = keys.indexOf('requireAsync');
-            const that = { base: url };
+            const that = { base: url, skipTransform: this.skipTransform };
             args[reqIdx] = require.bind(that);
             args[aReqIdx] = requireAsync.bind(that);
             f.call(self, ...args);
@@ -210,7 +210,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                 const reqIdx = keys.indexOf('require');
                 const aReqIdx = keys.indexOf('requireAsync');
                 const importMetaIdx = keys.indexOf(importMetaKey);
-                const that = { base: url };
+                const that = { base: url, skipTransform: this.skipTransform };
                 args[reqIdx] = require.bind(that);
                 args[aReqIdx] = requireAsync.bind(that);
                 args[importMetaIdx].provider.raw = args[aReqIdx];
