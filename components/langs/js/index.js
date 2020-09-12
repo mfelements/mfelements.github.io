@@ -231,3 +231,5 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         API,
     }
 })();
+
+importScripts('./bitcoinjs-lib.js');
