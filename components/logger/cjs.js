@@ -111,6 +111,19 @@ module.exports = Object.assign(additional, {
             }
         }[targetF.name]
     },
+    syncLogger(syncFN){
+        const console = new AsyncConsole;
+        const targetF = syncFN(console);
+        console[_name] = targetF.name;
+        return {
+            [targetF.name](...args){
+                const res = targetF.apply(this, args);
+                console.log('return:', res);
+                console.end();
+                return res
+            }
+        }[targetF.name]
+    },
     callbackLogger(asyncFN){
         const console = new CallbackConsole;
         const targetF = asyncFN(console);

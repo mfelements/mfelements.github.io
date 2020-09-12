@@ -223,7 +223,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
     }
 
     return {
-        require: asyncLogger(_ => require),
+        require: syncLogger(_ => require),
         requireAsync: asyncLogger(_ => requireAsync),
         requestAuth: asyncLogger(_ => requestAuth),
         API,
