@@ -53,7 +53,7 @@ const registerAction = (() => {
 
     for(const lang of [
         'js',
-        'lua-5.3.4',
+//        'lua-5.3.4',
     ]) new Lang(lang);
 
     langsSupported.default = langsSupported.js;
