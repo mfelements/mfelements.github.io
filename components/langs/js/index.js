@@ -165,6 +165,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                         filename,
                         sourceFileName,
                         code: !isAsync,
+                        minified: true,
                     };
                     if(isAsync){
                         plugins.push(Babel.availablePlugins['syntax-top-level-await']);
@@ -179,6 +180,8 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                             sourceMaps: 'inline',
                             filename,
                             sourceFileName,
+                            cloneInputAst: false,
+                            minified: true,
                         });
                         return code
                     }
