@@ -150,7 +150,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         if(!transformSrc){
             const { Babel } = globalThis;
             if(Babel){
-                transformSrc = (src, filename) => {
+                transformSrc = (src, filename, sourceFileName) => {
                     const plugins = [
                         Babel.availablePlugins['proposal-class-properties'],
                         Babel.availablePlugins['proposal-private-methods'],
@@ -167,6 +167,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                         ast: false,
                         sourceMaps: 'inline',
                         filename,
+                        sourceFileName,
                     });
                     return code
                 }
@@ -188,7 +189,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             if(url in syncModuleStorage) return syncModuleStorage[url];
             let src = downloadSync(url);
             const { keys, args, module, self } = argsAndExport(url);
-            if(!this.skipTransform) src = getTransformFunc()(src, transformUrlToFile(url));
+            if(!this.skipTransform) src = getTransformFunc()(src, transformUrlToFile(url), url);
             const f = new Function(...keys, `${overrides}\n${src}`);
             const reqIdx = keys.indexOf('require');
             const aReqIdx = keys.indexOf('requireAsync');
@@ -213,7 +214,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                 let src = await fetch(url).then(r => r.text());
                 const { keys, args, module, self } = argsAndExport(url);
                 if(this.skipTransform) src = `module._module = async (${ keys.join() }) => {\n${ src }\n}`;
-                else src = getTransformFunc(true, keys)(src, transformUrlToFile(url));
+                else src = getTransformFunc(true, keys)(src, transformUrlToFile(url), url);
                 const blob = new Blob([ src ], { type: 'application/javascript' });
                 const blobUrl = URL.createObjectURL(blob);
                 importScripts(blobUrl);
