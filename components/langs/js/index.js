@@ -169,10 +169,17 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                     if(isAsync){
                         plugins.push(Babel.availablePlugins['syntax-top-level-await']);
                         const { ast } = Babel.transform(src, settings);
-                        plugins.push(Babel.availablePlugins['es6-modules-mfwc-stage0'](importMetaKey, args));
                         settings.ast = false;
                         settings.code = true;
-                        const { code } = Babel.transformFromAst(ast, {}, settings);
+                        const { code } = Babel.transformFromAst(ast, {}, {
+                            presets: [],
+                            plugins: [ Babel.availablePlugins['es6-modules-mfwc-stage0'](importMetaKey, args) ],
+                            ast: false,
+                            code: true,
+                            sourceMaps: 'inline',
+                            filename,
+                            sourceFileName,
+                        });
                         return code
                     }
                     const { code } = Babel.transform(src, settings);
