@@ -181,7 +181,22 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
     function transformUrlToFile(a){
         const url = new URL(a);
         return '/' + url.host + url.pathname + url.search
-    }    
+    }
+
+    class NetworkError extends Error{}
+
+    function getPosition(src, position){
+        let lineN = 1;
+        for(const line of src.split('\n')){
+            if(line.length < position){
+                lineN++;
+                position -= line.length + 1;
+            } else return [
+                lineN,
+                position
+            ]
+        }
+    }
 
     function require(url){
         try{
@@ -207,15 +222,19 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
     }
 
     async function requireAsync(url){
-        try{
-            url = new URL(url, this.base).href;
-            if(url in asyncModuleStorage) return asyncModuleStorage[url];
-            return asyncModuleStorage[url] = (async () => {
-                let src = await fetch(url).then(r => r.text());
+        url = new URL(url, this.base).href;
+        if(url in asyncModuleStorage) return asyncModuleStorage[url];
+        return asyncModuleStorage[url] = (async () => {
+            let src;
+            try{
+                const resp = await fetch(url);
+                if(resp.status !== 200) throw new NetworkError(`${resp.status} ${resp.statusText}`);
+                src = await resp.text();
                 const { keys, args, module, self } = argsAndExport(url);
-                if(this.skipTransform) src = `module._module = async (${ keys.join() }) => {\n${ src }\n}`;
-                else src = getTransformFunc(true, keys)(src, transformUrlToFile(url), url);
-                const blob = new Blob([ src ], { type: 'application/javascript' });
+                const srcCompiled = this.skipTransform
+                    ? `module._module = async (${ keys.join() }) => {\n${ src }\n}`
+                    : getTransformFunc(true, keys)(src, transformUrlToFile(url), url);
+                const blob = new Blob([ srcCompiled ], { type: 'application/javascript' });
                 const blobUrl = URL.createObjectURL(blob);
                 importScripts(blobUrl);
                 URL.revokeObjectURL(blobUrl);
@@ -228,15 +247,25 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                 args[reqIdx] = require.bind(that);
                 args[aReqIdx] = requireAsync.bind(that);
                 args[importMetaIdx].provider.raw = args[aReqIdx];
-                f.call(self, ...args);
+                await f.call(self, ...args);
                 await module._promise;
                 return await module.exports
-            })()
-        } catch(e){
-            postMessage({
-                showError: `Cannot require module ${url}:\n${e.name}: ${e.message}`,
-            })
-        }
+            } catch(e){
+                let addToStack = `    at ${url}`;
+                const [ , position, message ] = e.message.split(/^(\d+)@(.+)$/);
+                if(position){
+                    e.message = message;
+                    addToStack += ':' + getPosition(src, position).join(':');
+                }
+                const estack = e.stack.split('\n');
+                estack.splice(1, 0, addToStack);
+                e.stack = estack.join('\n');
+                console.error(e);
+                postMessage({
+                    showError: `Cannot load module ${url}:\n${e.name}: ${e.message}`,
+                })
+            }
+        })()
     }
 
     return {
