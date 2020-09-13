@@ -7,6 +7,9 @@ const globalThis = this;
 importScripts('./rand.js');
 
 const { require, requireAsync, API, requestAuth, MFC } = (() => {
+
+    const globalModule = module;
+
     const rand = module.exports;
 
     importScripts('../logger/cjs.js');
@@ -143,7 +146,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
 
     let transformSrc;
 
-    function getTransformFunc(isAsync){
+    function getTransformFunc(isAsync, args){
         if(!transformSrc){
             const { Babel } = globalThis;
             if(Babel){
@@ -154,7 +157,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                     ];
                     if(isAsync) plugins.push(
                         Babel.availablePlugins['syntax-top-level-await'],
-                        Babel.availablePlugins['es6-modules-mfwc-stage0']
+                        Babel.availablePlugins['es6-modules-mfwc-stage0'](importMetaKey, args),
                     );
                     const { code } = Babel.transform(src, {
                         presets: [
@@ -165,7 +168,6 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                         sourceMaps: 'inline',
                         filename,
                     });
-                    console.log({ code });
                     return code
                 }
             } else {
@@ -185,8 +187,8 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             url = new URL(url, this.base).href;
             if(url in syncModuleStorage) return syncModuleStorage[url];
             let src = downloadSync(url);
-            if(!this.skipTransform) src = getTransformFunc()(src, transformUrlToFile(url));
             const { keys, args, module, self } = argsAndExport(url);
+            if(!this.skipTransform) src = getTransformFunc()(src, transformUrlToFile(url));
             const f = new Function(...keys, `${overrides}\n${src}`);
             const reqIdx = keys.indexOf('require');
             const aReqIdx = keys.indexOf('requireAsync');
@@ -209,9 +211,15 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             if(url in asyncModuleStorage) return asyncModuleStorage[url];
             return asyncModuleStorage[url] = (async () => {
                 let src = await fetch(url).then(r => r.text());
-                if(!this.skipTransform) src = getTransformFunc(true)(`${src}\n;${JSON.stringify(importMetaKey)}`, transformUrlToFile(url));
                 const { keys, args, module, self } = argsAndExport(url);
-                const f = new AsyncFunction(...keys, `${overrides}\n${src}`);
+                if(this.skipTransform) src = `module._module = async (${ keys.join() }) => {\n${ src }\n}`;
+                else src = getTransformFunc(true, keys)(src, transformUrlToFile(url));
+                const blob = new Blob([ src ], { type: 'application/javascript' });
+                const blobUrl = URL.createObjectURL(blob);
+                importScripts(blobUrl);
+                URL.revokeObjectURL(blobUrl);
+                const f = globalModule._module;
+                delete globalModule._module;
                 const reqIdx = keys.indexOf('require');
                 const aReqIdx = keys.indexOf('requireAsync');
                 const importMetaIdx = keys.indexOf(importMetaKey);
@@ -219,8 +227,9 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                 args[reqIdx] = require.bind(that);
                 args[aReqIdx] = requireAsync.bind(that);
                 args[importMetaIdx].provider.raw = args[aReqIdx];
-                await f.call(self, ...args);
-                return module.exports
+                f.call(self, ...args);
+                await module._promise;
+                return await module.exports
             })()
         } catch(e){
             postMessage({
