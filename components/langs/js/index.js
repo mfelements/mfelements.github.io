@@ -155,20 +155,27 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                         Babel.availablePlugins['proposal-class-properties'],
                         Babel.availablePlugins['proposal-private-methods'],
                     ];
-                    if(isAsync) plugins.push(
-                        Babel.availablePlugins['syntax-top-level-await'],
-                        Babel.availablePlugins['es6-modules-mfwc-stage0'](importMetaKey, args),
-                    );
-                    const { code } = Babel.transform(src, {
+                    const settings = {
                         presets: [
                             Babel.availablePresets.es2017,
                         ],
                         plugins,
-                        ast: false,
+                        ast: !!isAsync,
                         sourceMaps: 'inline',
                         filename,
                         sourceFileName,
-                    });
+                        code: !isAsync,
+                    };
+                    if(isAsync){
+                        plugins.push(Babel.availablePlugins['syntax-top-level-await']);
+                        const { ast } = Babel.transform(src, settings);
+                        plugins.push(Babel.availablePlugins['es6-modules-mfwc-stage0'](importMetaKey, args));
+                        settings.ast = false;
+                        settings.code = true;
+                        const { code } = Babel.transformFromAst(ast, {}, settings);
+                        return code
+                    }
+                    const { code } = Babel.transform(src, settings);
                     return code
                 }
             } else {
