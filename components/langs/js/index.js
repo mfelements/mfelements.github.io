@@ -164,12 +164,14 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                         sourceMaps: 'inline',
                         filename,
                         sourceFileName,
-                        code: !isAsync,
+                        code: true,
                         minified: true,
                     };
                     if(isAsync){
                         plugins.push(Babel.availablePlugins['syntax-top-level-await']);
-                        const { ast } = Babel.transform(src, settings);
+                        const { ast, code: code0 } = Babel.transform(src, settings);
+                        const smUrl = code0.split('\n').pop().slice(21);
+                        const sm = JSON.parse(downloadSync(smUrl));
                         settings.ast = false;
                         settings.code = true;
                         const { code } = Babel.transformFromAst(ast, {}, {
@@ -182,6 +184,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                             sourceFileName,
                             cloneInputAst: false,
                             minified: true,
+                            inputSourceMap: sm,
                         });
                         return code
                     }
