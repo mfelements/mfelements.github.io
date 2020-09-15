@@ -31,9 +31,9 @@ module.exports = function electrumX(rand, asyncLogger){
     })();
 
     function getMethodCaller(method){
-        method = 'electrumX.' + method;
+        const namedMethod = 'electrumX.' + method;
         return asyncLogger(console => ({
-            async [method](...params){
+            async [namedMethod](...params){
                 await __alive;
                 let resolve, reject;
                 const resultPromise = new Promise(($, _) => {
@@ -50,7 +50,7 @@ module.exports = function electrumX(rand, asyncLogger){
                 }));
                 return resultPromise
             }
-        }[method]))
+        }[namedMethod]))
     }
 
     function nextLevel(method){
