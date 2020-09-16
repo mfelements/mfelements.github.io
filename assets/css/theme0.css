@@ -1,7 +1,12 @@
 body.theme0, body:not(.themed){
+    --theme-color: #03a9f4;
+    --theme-light-color: #67daff;
+    --theme-dark-color: #007ac1;
     --bg-primary: #f7f7f7;
     --bg-secondary: #fff;
     --text-color: #000;
+    --text-light-color: #000;
+    --text-dark-color: #fff;
     --btn-shadow:
         0 -0.5rem 1rem rgba(255, 255, 255, 0.5),
         0 0.5rem 1rem rgba(221, 221, 221, 0.25);
