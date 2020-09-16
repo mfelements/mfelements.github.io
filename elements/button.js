@@ -3,6 +3,17 @@ import { editables } from './editable.js'
 import parseElement from '../components/generator.js'
 
 export default class Button extends Component{
+    mousedown({ layerX, layerY, target }){
+        const wrap = target.children[0];
+        const ripple = wrap.children[0];
+        ripple.classList.remove('start', 'active');
+        wrap.style.top = layerY + 'px';
+        wrap.style.left = layerX + 'px';
+        setTimeout(() => {
+          ripple.classList.add('start');
+          setTimeout(() => ripple.classList.add('active'))
+        })
+    }
     async click(){
         const { onClick, api, page } = this.props;
         this.setState({ loading: true });
@@ -20,6 +31,15 @@ export default class Button extends Component{
     }
     render(){
         const { text } = this.props;
-        return html`<button onclick=${this.click.bind(this)}>${text}</button>`
+        const { loading } = this.state;
+        return html`<button
+            class=${'md-ripple' + (loading ? ' loading' : '')}
+            onclick=${this.click.bind(this)}
+            onmousedown=${this.mousedown.bind(this)}
+        >
+            <div class=ripple-wrap><div class=ripple/></>
+            <div class=loading-spinner/>
+            ${text}
+        </>`
     }
 }

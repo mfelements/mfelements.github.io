@@ -39,15 +39,6 @@ button{
     box-shadow: var(--btn-shadow);
 }
 
-button:hover, button:focus{
-    background: var(--bg-primary);
-}
-
-button:active{
-    background: var(--text-color) !important;
-    color: var(--bg-secondary) !important;
-}
-
 .block{
     background: var(--bg-secondary);
     padding: 1.5rem;
@@ -160,6 +151,45 @@ dialog{
     padding: var(--padding);
     width: calc(100% - (var(--padding) * 2));
     white-space: pre-wrap;
+}
+
+.md-ripple{
+    position: relative;
+    overflow: hidden;
+}
+
+.md-ripple .ripple-wrap{
+    --width: 100%;
+    position: absolute;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    padding-bottom: var(--width);
+    width: var(--width);
+}
+.md-ripple .ripple{
+    --transition: .4s;
+    --width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: var(--theme-color);
+    border-radius: 50%;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0);
+}
+
+.md-ripple .ripple.start{
+    transform: scale(0.2);
+}
+
+.md-ripple .ripple.active{
+    background: transparent;
+    transition: var(--transition);
+    opacity: 1;
+    transform: scale(2);
 }
 
 /* mobile styles */
