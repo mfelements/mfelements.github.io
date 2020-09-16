@@ -1,6 +1,7 @@
 import html, { Component } from '../components/preact.js'
 import { editables } from './editable.js'
 import parseElement from '../components/generator.js'
+import Spinner from './spinner.js'
 
 export default class Button extends Component{
     mousedown({ layerX, layerY, target }){
@@ -38,7 +39,7 @@ export default class Button extends Component{
             onmousedown=${this.mousedown.bind(this)}
         >
             <div class=ripple-wrap><div class=ripple/></>
-            <div class=loading-spinner/>
+            <${Spinner}/>
             ${text}
         </>`
     }
