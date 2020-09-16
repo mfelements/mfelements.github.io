@@ -5,6 +5,7 @@ import Spinner from './spinner.js'
 
 export default class Button extends Component{
     mousedown({ layerX, layerY, target }){
+        if(this.state.loading) return;
         const wrap = target.children[0];
         const ripple = wrap.children[0];
         ripple.classList.remove('start', 'active');
@@ -16,6 +17,7 @@ export default class Button extends Component{
         })
     }
     async click(){
+        if(this.state.loading) return;
         const { onClick, api, page } = this.props;
         this.setState({ loading: true });
         const res = await api[onClick.action](...(onClick.args || []));
