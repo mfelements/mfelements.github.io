@@ -94,6 +94,18 @@ div:not([class]) > *:first-child{
     padding-bottom: calc(100% / var(--ratio-w) * var(--ratio-h));
 }
 
+.buttons{
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.buttons > *{
+    flex-grow: 1;
+    /* iOS doesn't support gap in flex, so... */
+    margin: 0 .5rem;
+}
+
 .dialog-bg{
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -136,6 +148,10 @@ dialog{
     transform: translate(0, -50%);
     transition: all var(--transition-speed) cubic-bezier(0.6, -0.5, 0.25, 1.5);
     position: fixed;
+}
+
+dialog .buttons > span > button{
+    width: 100%
 }
 
 .error-container{
