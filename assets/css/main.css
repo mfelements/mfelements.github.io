@@ -31,15 +31,14 @@ body{
 }
 
 button{
-    --tail: calc(1 / 14);
     font-size: .875rem;
-    padding: 0 calc((1 + var(--tail)) * 1rem);
-    border: calc(var(--tail) * 1rem) solid rgba(0,0,0,.12);
+    padding: 0 1.1rem;
+    border: .07rem solid rgba(0,0,0,.12);
     background: transparent;
-    margin: calc((.5 + var(--tail)) * 1rem);
+    margin: .57rem;
     margin-left: 0;
-    line-height: calc((2.5 + var(--tail)) * 1rem);
-    border-radius: calc((var(--tail) / 100 + .28) * 1rem);
+    line-height: 2.57rem;
+    border-radius: .28rem;
     white-space: nowrap;
     cursor: pointer;
 }
