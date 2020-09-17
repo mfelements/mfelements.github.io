@@ -36,7 +36,7 @@ export default class Button extends Component{
         const { text } = this.props;
         const { loading } = this.state;
         return html`<button
-            class=${'md-ripple' + (loading ? ' loading' : '')}
+            class=${`md-ripple ${loading ? ' loading' : ''}`}
             onclick=${this.click.bind(this)}
             onmousedown=${this.mousedown.bind(this)}
         >

@@ -31,12 +31,16 @@ body{
 }
 
 button{
-    font-size: 0.875rem;
-    padding: 0.5rem;
-    border: 0;
-    border-radius: 1rem;
-    background: var(--bg-secondary);
-    box-shadow: var(--btn-shadow);
+    --tail: calc(1 / 14);
+    font-size: .875rem;
+    padding: 0 calc((1 + var(--tail)) * 1rem);
+    border: calc(var(--tail) * 1rem) solid rgba(0,0,0,.12);
+    background: transparent;
+    margin: calc((.5 + var(--tail)) * 1rem);
+    margin-left: 0;
+    line-height: calc((2.5 + var(--tail)) * 1rem);
+    border-radius: calc((var(--tail) / 100 + .28) * 1rem);
+    white-space: nowrap;
 }
 
 .block{
