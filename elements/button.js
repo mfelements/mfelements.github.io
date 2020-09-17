@@ -20,8 +20,7 @@ export default class Button extends Component{
         if(this.state.loading) return;
         const { onClick, api, page } = this.props;
         this.setState({ loading: true });
-        const res = await api[onClick.action](...(onClick.args || []));
-        this.setState({ loading: false });
+        const res = await api[onClick.action](...(onClick.args || [])).finally(() => this.setState({ loading: false }));
         switch(res.type){
             case 'page':
                 return page.setState({
