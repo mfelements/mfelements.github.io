@@ -104,7 +104,7 @@ div:not([class]) > *:first-child{
 .buttons > *{
     flex-grow: 1;
     /* iOS doesn't support gap in flex, so... */
-    margin: 0 .5rem;
+    margin: .5rem;
 }
 
 .dialog-bg{
