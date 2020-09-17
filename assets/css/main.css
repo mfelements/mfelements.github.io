@@ -135,6 +135,7 @@ dialog{
     min-width: 288px;
     transform: translate(0, -50%);
     transition: all var(--transition-speed) cubic-bezier(0.6, -0.5, 0.25, 1.5);
+    position: fixed;
 }
 
 .error-container{
