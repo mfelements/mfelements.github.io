@@ -41,6 +41,7 @@ button{
     line-height: calc((2.5 + var(--tail)) * 1rem);
     border-radius: calc((var(--tail) / 100 + .28) * 1rem);
     white-space: nowrap;
+    cursor: pointer;
 }
 
 .block{
@@ -120,7 +121,6 @@ div:not([class]) > *:first-child{
     height: 100vh;
     background-color: #000;
     pointer-events: none;
-    cursor: pointer;
     opacity: 0;
     transition: all var(--transition-speed) cubic-bezier(0.5, -0.5, 0.25, 1.5);
 }
@@ -148,6 +148,11 @@ dialog{
     transform: translate(0, -50%);
     transition: all var(--transition-speed) cubic-bezier(0.6, -0.5, 0.25, 1.5);
     position: fixed;
+}
+
+dialog .buttons{
+    max-width: 420px;
+    float: right;
 }
 
 dialog .buttons > span > button{
