@@ -203,9 +203,9 @@ dialog{
 .md-ripple .md-spinner{
     position: absolute;
     color: var(--theme-dark-color);
-    width: 12px;
-    top: 8px;
-    right: 8px;
+    width: .75rem;
+    top: .25rem;
+    right: .25rem;
 }
 
 .md-ripple:not(.loading) .md-spinner{
