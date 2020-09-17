@@ -12,11 +12,11 @@ export default class Dialog extends Component{
             <${Body}>
                 <dialog open=${open}>
                     <div>${text}</>
-                    <div class=buttons>${(buttons || []).map(btnProps => html`
-                        <span onclick=${() => this.setState({ open: false })}>
-                            <${Button} ...${btnProps} ...${{ api, page }}/>
-                        </>
-                    `)}</>
+                    <div class=buttons>${(buttons || []).map(btnProps => html`<${Button}
+                        ...${btnProps}
+                        ...${{ api, page }}
+                        onclick.after=${() => this.setState({ open: false })}
+                    />`)}</>
                 </>
                 <div class=dialog-bg onclick=${() => this.setState({ open: false })}/>
             </>

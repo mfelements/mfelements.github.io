@@ -15,10 +15,14 @@ export default class SystemButton extends Component{
         })
     }
     async click(){
+        const { 'onclick.after': afterClick, onclick } = this.props;
         if(this.state.loading) return;
         this.setState({ loading: true });
-        try{ await this.props.onclick() } catch(e){}
-        this.setState({ loading: false })
+        try{
+            if(typeof onclick === 'function') await this.props.onclick();
+            if(typeof afterClick === 'function') afterClick()
+        } catch(e){}
+        this.setState({ loading: false });
     }
     render(){
         const { loading } = this.state;
