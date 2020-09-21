@@ -313,6 +313,10 @@ svg.md-spinner > circle{
     cursor: pointer;
 }
 
+.md-audio, .md-video{
+    --plyr-color-main: var(--theme-color);
+}
+
 /* mobile styles */
 
 @media (max-width: 520px) {
