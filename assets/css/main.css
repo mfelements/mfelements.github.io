@@ -307,6 +307,12 @@ svg.md-spinner > circle{
     width: 100%;
 }
 
+.md-audio .plyr__time{
+    font-family: 'Ubuntu Mono';
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
 /* mobile styles */
 
 @media (max-width: 520px) {
