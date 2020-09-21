@@ -51,7 +51,7 @@ button{
     box-shadow: var(--block-shadow);
 }
 
-div:not([class]) > * {
+div.tblock > * {
     --margin: 1rem;
     display: inline-block;
     width: calc(100% / var(--inline-count) - (var(--margin) * (var(--inline-count) - 1) / var(--inline-count)));
@@ -62,7 +62,7 @@ div:not([class]) > * {
     margin-right: 0;
 }
 
-div:not([class]) > *:first-child{
+div.tblock > *:first-child{
     margin-left: 0;
 }
 
@@ -316,7 +316,7 @@ svg.md-spinner > circle{
 /* mobile styles */
 
 @media (max-width: 520px) {
-    div:not([class]) > * {
+    div.tblock > * {
         display: block;
         width: 100%;
         margin-left: 0;

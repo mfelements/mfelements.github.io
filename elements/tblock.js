@@ -4,7 +4,7 @@ import { mapChildren } from './block.js'
 export default class TBlock extends Component{
     render(){
         const { children, api, page } = this.props;
-        return html`<div style=${{
+        return html`<div class=tblock style=${{
             '--inline-count': children.length
         }}>${
             mapChildren(page, children, api)
