@@ -315,6 +315,9 @@ svg.md-spinner > circle{
 
 .md-audio, .md-video{
     --plyr-color-main: var(--theme-color);
+    --plyr-menu-background: var(--bg-secondary);
+    --plyr-menu-shadow: var(--block-shadow);
+    --plyr-menu-radius: var(--border-radius);
 }
 
 /* mobile styles */
