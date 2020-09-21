@@ -291,6 +291,22 @@ svg.md-spinner > circle{
     stroke: currentColor;
 }
 
+/* material design audio block */
+
+.md-audio{
+    box-shadow: var(--block-shadow);
+    padding: .75rem;
+    display: flex;
+    background: var(--bg-secondary);
+    margin: .5rem 0;
+    border-radius: .28rem;
+}
+
+.md-audio > .plyr,
+.md-audio .plyr__controls{
+    width: 100%;
+}
+
 /* mobile styles */
 
 @media (max-width: 520px) {

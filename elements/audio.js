@@ -1,21 +1,25 @@
 import html, { Component } from '../components/preact.js'
-import { supportsHLSNatively, splitListByHLS, isHLS } from '../components/media.js'
-
-// TODO: Preloader animation
-class AudioPreloader extends Component{
-}
+import Plyr from '../components/plyr.js'
 
 export default class Audio extends Component{
+    constructor(props){
+        super(props);
+        this.options = {}
+    }
     async componentDidMount(){
-        const { sources } = this.props;
-        if(supportsHLSNatively()) return this.setState({ sources: sources.map(src => html`<source src=${src}>`) });
-        const [ hls, nonHls ] = splitListByHLS((await Promise.all(sources.map(isHLS))).filter(v => v !== null));
-        // TODO: Filter by supported types
-        if(nonHls.length) return this.setState({ sources: nonHls.map(src => html`<source src=${src}>`) });
-        // TODO: HLS with MSE
+        if(!this.audio) this.audio = this.base.children[0];
+        this.player = new (await Plyr)(this.audio, this.options);
+    }
+    componentWillUnmount(){
+        this.player.destroy();
+        this.player = null
     }
     render(){
-        const { sources } = this.state;
-        return sources ? html`<audio>${sources}</>` : html`<${AudioPreloader}/>`
+        const { sources } = this.props;
+        return html`<div class=md-audio>
+            <audio>${(sources || []).map(({ type, src }) => html`
+                <source ...${{ type, src }}/>
+            `)}</>
+        </>`
     }
 }
