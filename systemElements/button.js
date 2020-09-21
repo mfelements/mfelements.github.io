@@ -28,7 +28,7 @@ export default class SystemButton extends Component{
         const { loading } = this.state;
         const { children } = this.props;
         return html`<button
-            class=${`md-ripple ${loading ? ' loading' : ''}`}
+            class=${`md-btn md-ripple ${loading ? ' loading' : ''}`}
             onclick=${this.click.bind(this)}
             onmousedown=${this.mousedown.bind(this)}
         >

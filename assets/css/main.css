@@ -30,7 +30,7 @@ body{
     font-family: 'Ubuntu Mono', 'Noto Mono', 'Roboto Mono', mono, monospace;
 }
 
-button{
+button.md-btn{
     font-size: .875rem;
     padding: 0 1.1rem;
     border: .07rem solid rgba(0,0,0,.12);
