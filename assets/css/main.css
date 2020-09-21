@@ -38,7 +38,7 @@ button.md-btn{
     margin: .57rem;
     margin-left: 0;
     line-height: 2.57rem;
-    border-radius: .28rem;
+    border-radius: var(--border-radius);
     white-space: nowrap;
     cursor: pointer;
 }
@@ -46,7 +46,7 @@ button.md-btn{
 .block{
     background: var(--bg-secondary);
     padding: 1.5rem;
-    border-radius: .28rem;
+    border-radius: var(--border-radius);
     margin-bottom: 1.5rem;
     box-shadow: var(--block-shadow);
 }
@@ -136,7 +136,7 @@ dialog:not([open]){
 
 dialog{
     z-index: 2;
-    border-radius: .28rem;
+    border-radius: var(--border-radius);
     background: var(--bg-secondary);
     padding: 1.5rem;
     box-shadow: var(--block-shadow);
@@ -299,7 +299,7 @@ svg.md-spinner > circle{
     display: flex;
     background: var(--bg-secondary);
     margin: .5rem 0;
-    border-radius: .28rem;
+    border-radius: var(--border-radius);
 }
 
 .md-audio > .plyr,
