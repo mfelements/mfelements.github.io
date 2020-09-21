@@ -1,10 +1,11 @@
 body.theme0, body:not(.themed){
-    --theme-color: #03a9f4;
-    --theme-light-color: #67daff;
-    --theme-dark-color: #007ac1;
+    --theme-color: #4a5464;
+    --theme-light-color: #768092;
+    --theme-dark-color: #212b3a;
     --bg-primary: #f7f7f7;
     --bg-secondary: #fff;
     --text-color: #000;
+    --text-mid-color: #fff;
     --text-light-color: #000;
     --text-dark-color: #fff;
     --btn-shadow:
