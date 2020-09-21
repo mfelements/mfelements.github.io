@@ -1,0 +1,8 @@
+{
+    "dependencies": {
+        "hls.js": "*",
+        "htm": "*",
+        "plyr": "3.6.2",
+        "preact": "*"
+    }
+}
