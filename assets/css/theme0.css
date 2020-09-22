@@ -1,4 +1,4 @@
-body.theme0, body:not(.themed){
+:root{
     --theme-color: #4a5464;
     --theme-light-color: #768092;
     --theme-dark-color: #212b3a;
