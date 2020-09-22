@@ -1,1 +1,1 @@
-export function isHLS(url: string): Promise<[ string, boolean ]>
+export function isHls(type: string): boolean

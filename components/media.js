@@ -1,5 +1,3 @@
-import { getOnlyHeaders } from './http.js'
-
 const hlsMime = [
     'audio/mpegurl',
     'audio/x-mpegurl',
@@ -7,9 +5,6 @@ const hlsMime = [
     'application/vnd.apple.mpegURL',
 ];
 
-export async function isHLS(url){
-    let headers;
-    try{ headers = await getOnlyHeaders(url) } catch(e){ return false }
-    const contentType = headers.get('content-type').toLowerCase();
-    return hlsMime.includes(contentType)
+export function isHls(type){
+    return hlsMime.includes(type)
 }
