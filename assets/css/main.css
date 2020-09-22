@@ -99,6 +99,10 @@ div.tblock > *:first-child{
     filter: invert(calc(100% - var(--invert-amount)));
 }
 
+.image > img{
+    max-width: 100%;
+}
+
 .buttons{
     display: flex;
     flex-wrap: wrap;
