@@ -16,13 +16,15 @@ export default class Image extends Component{
             class: 'image',
             style: {},
         };
+        let children;
         if(ratio){
             const [ ratioW, ratioH ] = ratio.split(':');
             props.style['--ratio-w'] = ratioW;
             props.style['--ratio-h'] = ratioH;
-        }
+            children = html`<div style=${{ backgroundImage: `url("${src}")` }}/><div/>`
+        } else children = html`<img src=${src}/>`
         if(width) props.style.width = width;
         if(round) props.class += ' round';
-        return html`<div ...${props}><div style=${{ backgroundImage: `url("${src}")` }}/><div/></div>`
+        return html`<div ...${props}>${children}</div>`
     }
 }
