@@ -1,3 +1,9 @@
+@keyframes blink {
+    0% { color: var(--blink-color); }
+    50% { color: var(--blink-color-second); }
+    100% { color: var(--blink-color); }
+}
+
 :root{
     font-size: 16px;
     min-height: 100%;
@@ -323,10 +329,38 @@ svg.md-spinner > circle{
 }
 
 .md-audio, .md-video{
+    position: relative;
     --plyr-color-main: var(--theme-color);
     --plyr-menu-background: var(--bg-secondary);
     --plyr-menu-shadow: var(--block-shadow);
     --plyr-menu-radius: var(--border-radius);
+    --plyr-control-spacing: .625rem;
+    --plyr-control-icon-size: 1.125rem;
+    --plyr-range-thumb-active-shadow-width: .1875rem;
+    --plyr-range-thumb-height: .8125rem;
+}
+
+.md-audio.stream .live-indicator{
+    position: absolute;
+    z-index: 2;
+    display: block;
+    top: 1.6875rem;
+    left: 3.9375rem;
+}
+
+.md-audio.stream .live-indicator::before{
+    --blink-color: var(--live-record-color);
+    --blink-color-second: transparent;
+    content: '⬤';
+    position: relative;
+    top: -.0625rem;
+    left: -.25rem;
+    animation: blink 3s linear infinite;
+}
+
+.md-audio .plyr__volume {
+    max-width: 6.875rem;
+    min-width: 5rem;
 }
 
 /* mobile styles */
