@@ -97,6 +97,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         var xhr = new XMLHttpRequest;
         xhr.open('GET', url, false);
         xhr.send(null);
+        checkHTTPStatus(xhr.status, xhr.statusText);
         return xhr.responseText
     }
 
@@ -203,7 +204,16 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         return '/' + url.host + url.pathname + url.search
     }
 
-    class NetworkError extends Error{}
+    class NetworkError extends Error{
+        constructor(message){
+            super(message);
+            this.name = 'NetworkError'
+        }
+    }
+
+    function checkHTTPStatus(status, text){
+        if(+status.toString().slice(0, 1) !== 2) throw new NetworkError(`${status} ${text}`)
+    }
 
     function getPosition(src, position){
         let lineN = 1;
@@ -236,7 +246,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             return module.exports
         } catch(e){
             postMessage({
-                showError: `Cannot require module ${url}:\n${e.name}: ${e.message}`,
+                error: `Cannot require module ${url}:\n${e.name}: ${e.message}`,
             })
         }
     }
@@ -248,7 +258,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             let src;
             try{
                 const resp = await fetch(url);
-                if(resp.status !== 200) throw new NetworkError(`${resp.status} ${resp.statusText}`);
+                checkHTTPStatus(resp.status, resp.statusText);
                 src = await resp.text();
                 const { keys, args, module, self } = argsAndExport(url);
                 const srcCompiled = this.skipTransform
@@ -282,7 +292,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                 e.stack = estack.join('\n');
                 console.error(e);
                 postMessage({
-                    showError: `Cannot load module ${url}:\n${e.name}: ${e.message}`,
+                    error: `Cannot load module ${url}:\n${e.name}: ${e.message}`,
                 })
             }
         })()

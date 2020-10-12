@@ -83,9 +83,8 @@ export default class API{
                             }
                         })
                         .catch(e => {
-                            e.name = `API ${e.name}`;
                             e.message = `Cannot communicate with ${targetUrl}: ${e.message}`;
-                            throw errorLog(e)
+                            throw e
                         })
                         .then(parseResult)
                         .catch(e => {

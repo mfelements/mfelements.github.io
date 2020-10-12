@@ -8,10 +8,14 @@ async function require(url){
 
 const logger = require('./cjs.js');
 
-export default asyncFN => async (...args) => (await logger).default(asyncFN)(...args)
+export default asyncFN => async function(...args){
+    return (await logger).default(asyncFN).apply(this, args)
+}
 
 export function callbackLogger(asyncFN){
-    return async (...args) => (await logger).callbackLogger(asyncFN)(...args)
+    return async function(...args){
+        return (await logger).callbackLogger(asyncFN).apply(this, args)
+    }
 }
 
 export function withName(name, f){

@@ -68,7 +68,7 @@ const registerAction = (() => {
                 await requireAsync.call({ base: 'http://localhost/' }, requireScript);
                 postMessage({ id })
             } catch(e){
-                postMessage({ id, error: `Cannot load module: ${e.message}`, errorName: 'TypeError' })
+                postMessage({ id, error: `Cannot load module ${requireScript}:\n${e.name}: ${e.message}`, })
             }
         } else if(action){
             const { name, args } = action;
