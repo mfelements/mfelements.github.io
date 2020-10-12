@@ -60,7 +60,7 @@ const registerAction = (() => {
 
     const registeredActions = Object.create(null);
 
-    onmessage = async ({ data: { requireScript, action, id, actionResult, actionError, lang, langv } }) => {
+    onmessage = async ({ data: { requireScript, action, id, actionResult, actionError, actionErrorName, lang, langv } }) => {
         if(requireScript){
             try{
                 const langstr = (langsSupported[lang] || langsSupported.default).getFullVersion(langv || '');
@@ -68,18 +68,22 @@ const registerAction = (() => {
                 await requireAsync.call({ base: 'http://localhost/' }, requireScript);
                 postMessage({ id })
             } catch(e){
-                postMessage({ id, error: `Cannot load module: ${e.message}` })
+                postMessage({ id, error: `Cannot load module: ${e.message}`, errorName: 'TypeError' })
             }
         } else if(action){
             const { name, args } = action;
             try{
                 postMessage({ id, data: await registeredActions[name](...args) })
             } catch(e){
-                postMessage({ id, error: e.message })
+                postMessage({ id, error: e.message, errorName: e.name })
             }
         } else if(actionResult || actionError){
             if(id in module.actionStorage){
-                if(actionError) module.actionStorage[id].reject(actionError);
+                if(actionError){
+                    const e = new Error(actionError);
+                    e.name = actionErrorName || 'Error';
+                    module.actionStorage[id].reject(e)
+                }
                 else module.actionStorage[id].resolve(actionResult)
             }
         }

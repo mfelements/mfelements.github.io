@@ -40,9 +40,13 @@ export default (url, api, lang, langv) => new Promise((resolve, reject) => {
     worker.api = api;
     worker.onmessage = async ({ data: params }) => {
         if(params.id && !params.resultableAction){
-            const { data, error, id } = params;
+            const { data, error, errorName, id } = params;
             if(id in actionStorage){
-                if(error) actionStorage[id].reject(error);
+                if(error) {
+                    const e = new Error(error);
+                    e.name = errorName;
+                    actionStorage[id].reject(e)
+                }
                 else actionStorage[id].resolve(data)
             }
         } else if(params.action && params.action in actions){
@@ -56,12 +60,13 @@ export default (url, api, lang, langv) => new Promise((resolve, reject) => {
                 })
             } catch(e){
                 worker.postMessage({
+                    actionErrorName: e.name,
                     actionError: e.message,
                     id,
                 })
             }
-        } else if(params.showError){
-            logError({ message: params.showError })
+        } else if(params.error){
+            logError({ name: params.errorName, message: params.error })
         }
     };
     const id = createActionId();

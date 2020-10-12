@@ -2,9 +2,13 @@ import withLog, { withName } from './logger/index.js'
 import Hostname from './hostname.js'
 import errorLog from './errorMessage.js'
 import * as elements from './elements.js'
+import fetch from './fetch.js'
+import NamedError from './namedError.js'
 
 const intercepted = Object.create(null);
 const interceptedByUrl = Object.create(null);
+
+const RespError = withName('Response Error', class extends NamedError{});
 
 export function registerAction(moduleUrl, name, callback){
     interceptedByUrl[name] = moduleUrl;
@@ -31,20 +35,18 @@ export function getApiUrl(){
 function checkProps(testData){
     if(typeof testData === 'object' && !Array.isArray(testData)){
         const Component = elements[testData.type];
-        if(Component && typeof Component.checkProps === 'function'){
-            try{
-                Component.checkProps(testData)
-            } catch(e){
-                throw errorLog(e)
-            }
-        }
+        if(Component && typeof Component.checkProps === 'function') Component.checkProps(testData);
         for(const child of (testData.children || [])) checkProps(child)
     }
 }
 
 function parseResult({ error, data }){
-    if(error) throw errorLog(new Error(error));
-    checkProps(data);
+    if(error) throw new RespError(error);
+    try{
+        checkProps(data);
+    } catch(e){
+        e.name = `Response ${e.name}`
+    }
     return data
 }
 
@@ -56,7 +58,13 @@ export default class API{
                 return withLog(console => withName('API.' + p, (...data) => {
                     if(p in intercepted){
                         console.info('Intercepted action');
-                        return intercepted[p](...data)
+                        return (async () => {
+                            try{
+                                return await intercepted[p](...data)
+                            } catch(e){
+                                throw errorLog(e)
+                            }
+                        })()
                     }
                     const targetUrl = apiUrl + encodeURIComponent(p);
                     const options = {
@@ -67,8 +75,23 @@ export default class API{
                     };
                     if(data.length) options.body = JSON.stringify(data);
                     return fetch(targetUrl, options)
-                        .then(r => r.json())
+                        .then(async r => {
+                            try{
+                                return await r.json()
+                            } catch(e){
+                                throw new TypeError('response is not in JSON format')
+                            }
+                        })
+                        .catch(e => {
+                            e.name = `API ${e.name}`;
+                            e.message = `Cannot communicate with ${targetUrl}: ${e.message}`;
+                            throw errorLog(e)
+                        })
                         .then(parseResult)
+                        .catch(e => {
+                            e.name = `API ${e.name}`;
+                            throw errorLog(e)
+                        })
                 }))
             }
         })
