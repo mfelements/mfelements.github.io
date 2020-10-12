@@ -14,3 +14,9 @@ export function registerAction(moduleUrl: string, name: string, callback: (...ar
 export function unregisterActions(moduleUrl: string): void
 
 export function getApiUrl(): string
+
+export class APICallOptions{
+    constructor(options: {
+        silent?: boolean
+    })
+}

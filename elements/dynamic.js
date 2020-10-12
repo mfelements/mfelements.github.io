@@ -1,5 +1,6 @@
 import { Component } from '../components/preact.js'
 import { mapChildren } from './block.js'
+import { APICallOptions } from '../components/api.js'
 
 function setIntervalImmediate(callback, ms, ...args){
     callback(...args);
@@ -14,10 +15,10 @@ export default class Dynamic extends Component{
         }
     }
     componentDidMount(){
-        const { update: { action, args }, default: data, interval, api } = this.props;
+        const { update: { action, args }, default: data, interval, api, silent } = this.props;
         this.setState({ data });
         this.interval = setIntervalImmediate(async () => {
-            const data = await api[action](...(args || []));
+            const data = await api[action].apply(new APICallOptions({ silent }), args || []);
             this.setState({data})
         }, interval)
     }

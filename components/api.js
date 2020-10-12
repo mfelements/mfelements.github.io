@@ -10,6 +10,12 @@ const interceptedByUrl = Object.create(null);
 
 const RespError = withName('Response Error', class extends NamedError{});
 
+export class APICallOptions{
+    constructor(opts){
+        Object.assign(this, opts)
+    }
+}
+
 export function registerAction(moduleUrl, name, callback){
     interceptedByUrl[name] = moduleUrl;
     intercepted[name] = callback
@@ -55,14 +61,18 @@ export default class API{
         const apiUrl = getApiUrl();
         return new Proxy(Object.create(API.prototype), {
             get(_, p){
-                return withLog(console => withName('API.' + p, (...data) => {
+                return withLog(console => withName('API.' + p, function(...data){
+                    const callOpts = {
+                        silent: false,
+                    };
+                    if(this instanceof APICallOptions) Object.assign(callOpts, this);
                     if(p in intercepted){
                         console.info('Intercepted action');
                         return (async () => {
                             try{
                                 return await intercepted[p](...data)
                             } catch(e){
-                                throw errorLog(e)
+                                throw callOpts.silent ? e : errorLog(e)
                             }
                         })()
                     }
@@ -89,7 +99,7 @@ export default class API{
                         .then(parseResult)
                         .catch(e => {
                             e.name = `API ${e.name}`;
-                            throw errorLog(e)
+                            throw callOpts.silent ? e : errorLog(e)
                         })
                 }))
             }
