@@ -94,11 +94,26 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
     ];
 
     function downloadSync(url){
-        var xhr = new XMLHttpRequest;
+        const xhr = new XMLHttpRequest;
         xhr.open('GET', url, false);
-        xhr.send(null);
+        try{
+            xhr.send(null)
+        } catch(e){
+            throw new NetworkError(`Failed to fetch ${url}. Check the console for details`)
+        }
         checkHTTPStatus(xhr.status, xhr.statusText);
         return xhr.responseText
+    }
+
+    async function downloadAsync(url){
+        let resp
+        try{
+            resp = await fetch(url)
+        } catch(e){
+            throw new NetworkError(`Failed to fetch ${url}. Check the console for details`)
+        }
+        checkHTTPStatus(resp.status, resp.statusText);
+        return await resp.text()
     }
 
     function dirname(url){
@@ -257,9 +272,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         return asyncModuleStorage[url] = (async () => {
             let src;
             try{
-                const resp = await fetch(url);
-                checkHTTPStatus(resp.status, resp.statusText);
-                src = await resp.text();
+                src = await downloadAsync(url);
                 const { keys, args, module, self } = argsAndExport(url);
                 const srcCompiled = this.skipTransform
                     ? `module._module = async (${ keys.join() }) => {\n${ src }\n}`
