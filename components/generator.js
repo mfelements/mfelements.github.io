@@ -31,7 +31,7 @@ class Text extends Component{
     }
 }
 
-export default function parseElement(api, element){
+export default function parseElement(api, element, additionalParams){
     if(typeof element === 'string' || typeof element === 'number') return html`<${Text} t=${element}/>`;
     if(Array.isArray(element)) return html`<${elements.tblock} children=${element} api=${api} page=${this}/>`;
     if(element.type === 'page'){
@@ -47,9 +47,12 @@ export default function parseElement(api, element){
         app.setState({
             generated: null,
         });
+        const sideInfo = {};
+        if(additionalParams) Object.assign(sideInfo, additionalParams);
         setTimeout(() => app.setState({
-            generated: html`<${elements.page} ...${element} api=${api}/>`,
-        }))
+            generated: Object.assign(html`<${elements.page} ...${element} api=${api}/>`, sideInfo),
+        }));
+        return html`${null}`
     }
     return html`<${elements[element.type]} ...${element} api=${api} page=${this}/>`
 }

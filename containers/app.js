@@ -1,43 +1,102 @@
 import html, { Component } from '../components/preact.js'
 import LoadingComponent from './loading.js'
-import API from '../components/api.js'
+import API, { APICallOptions } from '../components/api.js'
 import generate from '../components/generator.js'
 import Head from './head.js'
 import { css } from '../components/paths.js'
+import * as Colors from '../components/colorProcessor.js'
 
 const api = Symbol();
 
 /** @type {App} */
 let currentApp;
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+const logoDisplayTimeout = 1000,
+    transitionDelay = 500;
+
 export default class App extends Component{
     constructor(props){
         super(props);
         this[api] = new API;
+        const themeColor = '#4a5464';
         this.state = {
-            generated: null,
+            mfeLogo: '/assets/logo.svg',
+            title: 'MFElements',
+            mfeThemeColor: themeColor,
+            mfeTextColor: Colors.toString(Colors.textColor(Colors.toColor(themeColor))),
         }
     }
     async componentDidMount(){
         currentApp = this;
         try{
-            const page = await this[api].getIndex();
-            generate(this[api], page)
+            let indexLoaded;
+            const [ page ] = await Promise.all([
+                this[api].getIndex.call(new APICallOptions({ silent: true })).then(r => (indexLoaded = true, r)),
+                // just a required pause to show mfelements logo even if resources are already loaded
+                sleep(logoDisplayTimeout).then(() => {
+                    // isn't already loaded? we need to notify user
+                    if(!indexLoaded) this.setState({
+                        showLoadingIndexText: true,
+                    });
+                }),
+            ]);
+            if(page.type !== 'page') throw new TypeError('"getIndex" API method does not returned a page object');
+            let themeColor = Colors.toColor(page.themeColor || this.state.mfeThemeColor);
+            themeColor.a = 1; // slice alpha channel
+            if(!Colors.isDark(themeColor)) themeColor = Colors.darker(Colors.normalizeColor(themeColor));
+            Colors.setThemeColor(themeColor);
+            if('icon' in page) this.setState({ serviceLogo: page.icon });
+            if('title' in page) this.setState({ serviceTitle: page.title });
+            this.setState({
+                themeColor: Colors.toString(themeColor),
+                textColor: Colors.toString(Colors.textColor(themeColor)),
+            });
+            generate(this[api], page, { _M_dummy: page.dummy });
+            setTimeout(() => this.setState({
+                serviceLogoTimeoutDone: true,
+            }), logoDisplayTimeout + transitionDelay)
         } catch(e){
-            console.error(e)
+            console.error(e);
+            this.setState({ error: `${e.name}: ${e.message}` })
         }
     }
     componentWillUnmount(){
         currentApp = null
     }
     render(){
-        const { generated } = this.state;
+        const { generated, error, serviceLogo, mfeLogo, showLoadingIndexText, serviceLogoTimeoutDone, title, serviceTitle, mfeThemeColor, mfeTextColor, themeColor, textColor } = this.state;
+        const doShowServiceLoading = !!((generated && generated._M_dummy) || !serviceLogoTimeoutDone),
+            doShowMFELoading = !generated && doShowServiceLoading;
         return html`
             <${Head}>
                 <link rel=stylesheet href="${css}/main.css"/>
-                <link rel=stylesheet href="${css}/theme0.css"/>
+                <link rel=stylesheet href="${css}/theme.light.css"/>
+                <link rel=icon href=${serviceLogo || mfeLogo}/>
+                ${!generated || generated._M_dummy ? html`<title>${serviceTitle || title}</>` : null}
             </>
-            ${generated ? generated : html`<${LoadingComponent}/>`}
+            ${generated}
+            <${LoadingComponent}
+                logo=${serviceLogo}
+                title=${serviceTitle}
+                errorText=${error}
+                showLoadingText=${serviceLogoTimeoutDone && !(generated && !generated._M_dummy)}
+                show=${doShowServiceLoading || doShowMFELoading}
+                color=${themeColor}
+                textColor=${textColor}
+                transitionDelay=${transitionDelay}
+            />
+            <${LoadingComponent}
+                logo=${mfeLogo}
+                title=${title}
+                errorText=${error}
+                showLoadingText=${showLoadingIndexText}
+                show=${doShowMFELoading}
+                color=${mfeThemeColor}
+                textColor=${mfeTextColor}
+                transitionDelay=${transitionDelay}
+            />
         `
     }
 }
