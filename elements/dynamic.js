@@ -1,11 +1,7 @@
 import { Component } from '../components/preact.js'
 import { mapChildren } from './block.js'
 import { APICallOptions } from '../components/api.js'
-
-function setIntervalImmediate(callback, ms, ...args){
-    callback(...args);
-    return setInterval(callback, ms, ...args)
-}
+import { setAsyncIntervalImmediate } from '../components/helpers.js'
 
 export default class Dynamic extends Component{
     constructor(props){
@@ -17,13 +13,13 @@ export default class Dynamic extends Component{
     componentDidMount(){
         const { update: { action, args }, default: data, interval, api, silent } = this.props;
         this.setState({ data });
-        this.interval = setIntervalImmediate(async () => {
+        this.clearInterval = setAsyncIntervalImmediate(async () => {
             const data = await api[action].apply(new APICallOptions({ silent }), args || []);
             this.setState({data})
         }, interval)
     }
     componentWillUnmount(){
-        clearInterval(this.interval)
+        this.clearInterval()
     }
     render(){
         const { api, page } = this.props;
