@@ -14,7 +14,7 @@ export function toColor(v){
             return { r, g, b, a: a === undefined ? 1 : a }
         }
     }
-    throw new TypeError(`Color ${v} is not valid`)
+    throw new TypeError(`Color ${JSON.stringify(v)} is not valid`)
 }
 
 export function toString(v){
