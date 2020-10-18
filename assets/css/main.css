@@ -59,21 +59,23 @@ button.md-btn{
     border-radius: var(--border-radius);
     margin-bottom: 1.5rem;
     box-shadow: var(--block-shadow);
+    min-width: min-content;
+}
+
+div.tblock{
+    --margin: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    margin: calc(var(--margin) * -1);
 }
 
 div.tblock > * {
-    --margin: 1rem;
-    display: inline-block;
-    width: calc(100% / var(--inline-count) - (var(--margin) * (var(--inline-count) - 1) / var(--inline-count)));
     overflow: hidden;
     text-overflow: ellipsis;
     vertical-align: top;
     margin: var(--margin);
-    margin-right: 0;
-}
-
-div.tblock > *:first-child{
-    margin-left: 0;
+    flex-grow: 1;
+    min-width: min-content;
 }
 
 .image{
@@ -415,8 +417,6 @@ svg.md-spinner > circle{
 
 @media (max-width: 520px) {
     div.tblock > * {
-        display: block;
-        width: 100%;
-        margin-left: 0;
+        /**/
     }
 }
