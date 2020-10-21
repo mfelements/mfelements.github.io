@@ -51,7 +51,8 @@ function parseResult({ error, data }){
     try{
         checkProps(data);
     } catch(e){
-        e.name = `Response ${e.name}`
+        e.name = `Response ${e.name}`;
+        throw e
     }
     return data
 }
