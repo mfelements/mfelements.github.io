@@ -411,6 +411,7 @@ svg.md-spinner > circle{
     height: 4em;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: center;
 }
 
 .md-card{
