@@ -42,7 +42,7 @@ function checkProps(testData){
     if(typeof testData === 'object' && !Array.isArray(testData)){
         const Component = elements[testData.type];
         if(Component && typeof Component.checkProps === 'function') Component.checkProps(testData);
-        for(const child of (testData.children || [])) checkProps(child)
+        if(testData.children) for(const child of (Array.isArray(testData.children) ? testData.children : [testData.children])) checkProps(child)
     }
 }
 
