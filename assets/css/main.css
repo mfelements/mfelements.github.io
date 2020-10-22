@@ -63,7 +63,7 @@ button.md-btn{
 }
 
 div.tblock{
-    --margin: 1rem;
+    --margin: 1em;
     display: flex;
     flex-wrap: wrap;
     margin: calc(var(--margin) * -1);
@@ -418,6 +418,7 @@ svg.md-spinner > circle{
     position: relative;
     display: inline-block;
     perspective: calc(var(--width) * 3);
+    max-width: 100%;
 }
 
 .md-card-container{
@@ -426,6 +427,7 @@ svg.md-spinner > circle{
     transform: rotateY(0);
     transition: .3s ease-in-out transform;
     transform-style: preserve-3d;
+    font-size: calc(var(--width) / 100 * 7);
 }
 
 .md-card.flipped > .md-card-container{
@@ -436,14 +438,18 @@ svg.md-spinner > circle{
     position: absolute;
     top: 0;
     left: 0;
-    width: calc(100% - var(--border-radius));
-    height: calc(100% - var(--border-radius));
+    width: calc(100% - var(--border-radius) * 2);
+    height: calc(100% - var(--border-radius) * 2);
     backface-visibility: hidden;
     border-radius: var(--border-radius);
-    padding: calc(var(--border-radius) / 2);
+    padding: calc(var(--border-radius));
     overflow: hidden;
     background-color: var(--color, var(--bg-secondary));
     box-shadow: var(--block-shadow);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .md-card-front{
@@ -452,6 +458,14 @@ svg.md-spinner > circle{
 
 .md-card-back{
     transform: rotateY(180deg);
+}
+
+.md-card-container .tblock{
+    width: 100%;
+}
+
+.markdown-rendered{
+    margin: 0 !important;
 }
 
 /* mobile styles */

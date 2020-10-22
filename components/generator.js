@@ -12,14 +12,16 @@ class TextLoader extends Component{
 class Text extends Component{
     constructor(props){
         super(props);
-        this.state = {}
+        this.state = {
+            t: html`<${TextLoader} len=${(props.t + '').length}/>`
+        }
     }
     componentDidMount(props = this.props){
         let { t } = props;
         t = '' + t;
-        markdownit.render(t).then(v => this.setState({ t: html([v]) }));
-        this.setState({
-            t: html`<${TextLoader} len=${t.length}/>`
+        markdownit.render(t).then(v => {
+            this.setState({ t: html`<div class=markdown-rendered/>` });
+            setTimeout(() => this.base.innerHTML = v)
         })
     }
     shouldComponentUpdate(nextProps, nextState){
