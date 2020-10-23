@@ -428,6 +428,10 @@ svg.md-spinner > circle{
     transition: .3s ease-in-out transform;
     transform-style: preserve-3d;
     font-size: calc(var(--width) / 100 * 7);
+    background-color: var(--bg-secondary);
+    box-shadow: var(--block-shadow);
+    border-radius: var(--border-radius);
+    cursor: pointer;
 }
 
 .md-card.flipped > .md-card-container{
@@ -441,11 +445,10 @@ svg.md-spinner > circle{
     width: calc(100% - var(--border-radius) * 2);
     height: calc(100% - var(--border-radius) * 2);
     backface-visibility: hidden;
-    border-radius: var(--border-radius);
-    padding: calc(var(--border-radius));
+    border-radius: inherit;
+    padding: var(--border-radius);
     overflow: hidden;
     background-color: var(--color, var(--bg-secondary));
-    box-shadow: var(--block-shadow);
     display: flex;
     flex-direction: column;
     justify-content: center;

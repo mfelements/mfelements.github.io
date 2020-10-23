@@ -3,6 +3,7 @@ import Button from './button.js'
 import { mapChildren } from './block.js'
 import { propsTypesSymbol } from '../components/typedComponent.js'
 import { string, getClass } from '../components/types.js'
+import * as Colors from '../components/colorProcessor.js'
 
 class CardContent extends Component{
     render(){
@@ -47,6 +48,11 @@ export default class Card extends Button{
         props.style['--ratio-r'] = '' + +ratioR;
         if(width) props.style['width'] = width;
         else if(height) props.style['width'] = `calc(${height} / var(--ratio-h) * var(--ratio-w))`;
+        if(color){
+            const processedColor = Colors.normalizeColor(Colors.toColor(color));
+            processedColor.a = 0.121;
+            props.style['--color'] = Colors.toString(processedColor)
+        }
         return html`<div class=${'md-card' + (flipped ? ' flipped': '')} ...${props}>
             <div class=md-card-container>${
                 Array.isArray(children)
