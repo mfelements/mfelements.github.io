@@ -17,9 +17,14 @@ export function toColor(v){
     throw new TypeError(`Color ${JSON.stringify(v)} is not valid`)
 }
 
+function fixAlpha(a){
+    a = a * 256;
+    return a > 255 ? 255 : a
+}
+
 export function toString(v){
     const { r, g, b, a } = v;
-    return '#' + [ r, g, b, a * 255 ].map(v => Math.round(v).toString(16).padStart(2, '0')).join('')
+    return '#' + [ r, g, b, fixAlpha(a) ].map(v => Math.round(v).toString(16).padStart(2, '0')).join('')
 }
 
 export function isDark({ r, g, b }){
