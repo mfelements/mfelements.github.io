@@ -16,6 +16,11 @@ class CardContent extends Component{
     }
 }
 
+function needToPreventClickHandler(e){
+    const { target: { nodeName } } = e;
+    return nodeName === 'BUTTON'
+}
+
 export default class Card extends Button{
     static get [propsTypesSymbol](){
         return {
@@ -56,8 +61,14 @@ export default class Card extends Button{
         return html`<div class=${'md-card' + (flipped ? ' flipped': '')} ...${props}>
             <div class=md-card-container>${
                 Array.isArray(children)
-                    ? html`<${CardContent} front=${mapChildren(page, children[0], api)} back=${mapChildren(page, children[1], api)} onClick=${() => { this.setState({ flipped: !flipped }) }}/>`
-                    : html`<${CardContent} front=${mapChildren(page, children, api)} back=${null} onClick=${this.click.bind(this)}/>`
+                    ? html`<${CardContent} front=${mapChildren(page, children[0], api)} back=${mapChildren(page, children[1], api)} onClick=${e => {
+                        if(needToPreventClickHandler(e)) return;
+                        this.setState({ flipped: !flipped })
+                    }}/>`
+                    : html`<${CardContent} front=${mapChildren(page, children, api)} back=${null} onClick=${e => {
+                        if(needToPreventClickHandler(e)) return;
+                        this.click.apply(this)
+                    }}/>`
             }</>
         </>`
     }
