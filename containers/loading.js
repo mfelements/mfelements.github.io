@@ -1,8 +1,10 @@
+import { getApiUrl } from '../components/api.js'
 import html, { Component } from '../components/preact.js'
 
 export default class extends Component{
     render(){
         const { logo, title, errorText, showLoadingText, show, color, textColor, transitionDelay } = this.props;
+        const logoUrl = new URL(logo, getApiUrl()).toString();
         return html`
         <div class=loading-container-background style=${{
             opacity: +show,
@@ -16,7 +18,7 @@ export default class extends Component{
             pointerEvents: show ? 'all' : 'none',
         }}>
             <div class=logo>
-                <img src=${logo}/>
+                <img src=${logoUrl}/>
                 <div class=title>${title}</>
             </>
             <div

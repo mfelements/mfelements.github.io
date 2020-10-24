@@ -88,7 +88,7 @@ export default class App extends Component{
                 transitionDelay=${transitionDelay}
             />
             <${LoadingComponent}
-                logo=${mfeLogo}
+                logo=${new URL(mfeLogo, location.origin).toString()}
                 title=${title}
                 errorText=${error}
                 showLoadingText=${showLoadingIndexText}
