@@ -243,6 +243,13 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
         }
     }
 
+    function withCallAndApply(orig, that){
+        return Object.assign(orig.bind(that), {
+            call: (_this, ...args) => orig.call(Object.assign(that, _this), ...args),
+            apply: (_this, ...args) => orig.apply(Object.assign(that, _this), ...args),
+        })
+    }
+
     function require(url){
         try{
             url = new URL(url, this.base).href;
@@ -254,8 +261,8 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             const reqIdx = keys.indexOf('require');
             const aReqIdx = keys.indexOf('requireAsync');
             const that = { base: url, skipTransform: this.skipTransform };
-            args[reqIdx] = require.bind(that);
-            args[aReqIdx] = requireAsync.bind(that);
+            args[reqIdx] = withCallAndApply(require, that);
+            args[aReqIdx] = withCallAndApply(requireAsync, that);
             f.call(self, ...args);
             syncModuleStorage[url] = module.exports;
             return module.exports
@@ -287,8 +294,8 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                 const aReqIdx = keys.indexOf('requireAsync');
                 const importMetaIdx = keys.indexOf(importMetaKey);
                 const that = { base: url, skipTransform: this.skipTransform };
-                args[reqIdx] = require.bind(that);
-                args[aReqIdx] = requireAsync.bind(that);
+                args[reqIdx] = withCallAndApply(require, that);
+                args[aReqIdx] = withCallAndApply(requireAsync, that);
                 args[importMetaIdx].provider.raw = args[aReqIdx];
                 await f.call(self, ...args);
                 await module._promise;
