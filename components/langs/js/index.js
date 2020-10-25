@@ -245,8 +245,8 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
 
     function withCallAndApply(orig, that){
         return Object.assign(orig.bind(that), {
-            call: (_this, ...args) => orig.call(Object.assign(that, _this), ...args),
-            apply: (_this, ...args) => orig.apply(Object.assign(that, _this), ...args),
+            call: (_this, ...args) => orig.call(Object.assign({}, that, _this), ...args),
+            apply: (_this, ...args) => orig.apply(Object.assign({}, that, _this), ...args),
         })
     }
 
