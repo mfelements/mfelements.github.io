@@ -64,6 +64,7 @@ class AsyncConsole{
         const finish = new Date;
         console.group('%cAsync function logger for %c' + (this[_name] || 'anonymous') + ` %c(%cdone in ${diff(start, finish)}%c) @ ${now(start)} - ${now(finish)}`, 'font-weight: normal;', 'font-weight: bold;', timeStyle, 'color: #1162ce; font-weight: bold;', timeStyle);
         this[_stack].forEach(cb => cb());
+        this[_stack] = [];
         console.groupEnd()
     }
 }
