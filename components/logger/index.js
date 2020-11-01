@@ -6,7 +6,7 @@ async function require(url){
     return module.exports
 }
 
-const logger = require('./cjs.js');
+const logger = require('https://cdn.jsdelivr.net/gh/mfelements/logger@0.0.1/index.min.js');
 
 export default asyncFN => async function(...args){
     return (await logger).default(asyncFN).apply(this, args)

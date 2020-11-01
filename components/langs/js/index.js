@@ -4,28 +4,22 @@ const module = { actionStorage: Object.create(null) };
 
 const globalThis = this;
 
-importScripts('./rand.js');
+importScripts('../langs/js/modules.js');
 
-const { require, requireAsync, API, requestAuth, MFC } = (() => {
+const _Function = (function(){ throw new EvalError('Cannot eval or construct new function in module') }).bind(null);
+
+_Function.prototype = _Function;
+
+this.eval = _Function;
+
+Object.defineProperty(Object.getPrototypeOf(() => {}), 'constructor', { value: _Function });
+Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { value: _Function });
+
+const { require, requireAsync } = (() => {
 
     const globalModule = module;
 
-    const rand = module.exports;
-
-    importScripts('../logger/cjs.js');
-    const { default: asyncLogger, syncLogger } = module.exports;
-
-    importScripts('./electrumAPI.js');
-    const electrumX = module.exports;
-
-    const MFC = namedObject('MFC');
-    MFC.electrumX = electrumX(rand, asyncLogger);
-
-    function generateActionStorageId(){
-        const id = rand();
-        if(id in module.actionStorage) return generateActionStorageId();
-        return id
-    }
+    const rand = require('rand');
 
     function namedObject(name){
         const obj = Object.create(null);
@@ -33,51 +27,7 @@ const { require, requireAsync, API, requestAuth, MFC } = (() => {
         return obj
     }
 
-    const API = new Proxy(Object.create(null), {
-        get(_, name){
-            return (...args) => new Promise((resolve, reject) => {
-                const id = generateActionStorageId();
-                module.actionStorage[id] = { resolve, reject };
-                postMessage({
-                    resultableAction: 'apiCall',
-                    args: [{ name, args }],
-                    id
-                });
-            })
-        }
-    });
-
-    function requestAuth(keys){
-        return new Promise((resolve, reject) => {
-            const id = generateActionStorageId();
-            module.actionStorage[id] = { resolve, reject };
-            postMessage({
-                resultableAction: 'requestAuth',
-                args: [ keys ],
-                id
-            });
-        })
-    }
-
-    const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
-
-    const argsName = '_' + rand(),
-        srcName = '_' + rand();
-
-    const overrides = `class Function{
-    constructor(...${argsName}){
-        const ${srcName} = ${argsName}.pop();
-        return eval('(function(' + ${argsName}.join(', ') + '){\\n' + ${srcName} + '\\n})')
-    }
-}
-class AsyncFunction{
-    constructor(...${argsName}){
-        const ${srcName} = ${argsName}.pop();
-        return eval('(async function(' + ${argsName}.join(', ') + '){\\n' + ${srcName} + '\\n})')
-    }
-}
-Object.defineProperty(Object.getPrototypeOf(() => {}), 'constructor', { value: Function });
-Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { value: AsyncFunction });`;
+    const argsName = '_' + rand();
 
     const syncModuleStorage = Object.create(null);
     const asyncModuleStorage = Object.create(null);
@@ -148,6 +98,8 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                     name: 'requireAsync'
                 },
             }),
+            Function: _Function,
+            AsyncFunction: _Function,
         });
         args.self = args;
         const keys = Object.keys(args);
@@ -170,6 +122,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                     const plugins = [
                         Babel.availablePlugins['proposal-class-properties'],
                         Babel.availablePlugins['proposal-private-methods'],
+                        [ Babel.availablePlugins['proposal-decorators'], { decoratorsBeforeExport: true } ],
                     ];
                     const settings = {
                         presets: [
@@ -252,12 +205,22 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
 
     function require(url){
         try{
+            if(url in globalModule._predefined) return globalModule._predefined[url];
+            if(url in globalModule._precompiled) return require.call({ skipTransform: true }, globalModule._precompiled[url]);
+            if(url in globalModule._preconfigured) return require.call({}, globalModule._preconfigured[url]);
             url = new URL(url, this.base).href;
             if(url in syncModuleStorage) return syncModuleStorage[url];
-            let src = downloadSync(url);
+            const src = downloadSync(url);
             const { keys, args, module, self } = argsAndExport(url);
-            if(!this.skipTransform) src = getTransformFunc()(src, transformUrlToFile(url), url);
-            const f = new Function(...keys, `${overrides}\n${src}`);
+            const srcCompiled = this.skipTransform
+                ? `module._module = (${ keys.join() }) => {\n'use strict';\n${ src }\n}`
+                : getTransformFunc()(src, transformUrlToFile(url), url);
+            const blob = new Blob([ srcCompiled ], { type: 'application/javascript' });
+            const blobUrl = URL.createObjectURL(blob);
+            importScripts(blobUrl);
+            URL.revokeObjectURL(blobUrl);
+            const f = globalModule._module;
+            delete globalModule._module;
             const reqIdx = keys.indexOf('require');
             const aReqIdx = keys.indexOf('requireAsync');
             const that = { base: url, skipTransform: this.skipTransform };
@@ -267,13 +230,14 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
             syncModuleStorage[url] = module.exports;
             return module.exports
         } catch(e){
-            postMessage({
-                error: `Cannot require module ${url}:\n${e.name}: ${e.message}`,
-            })
+            throw e
         }
     }
 
     async function requireAsync(url){
+        if(url in globalModule._predefined) return globalModule._predefined[url];
+        if(url in globalModule._precompiled) return requireAsync.call({ skipTransform: true }, globalModule._precompiled[url]);
+        if(url in globalModule._preconfigured) return requireAsync.call({}, globalModule._preconfigured[url]);
         url = new URL(url, this.base).href;
         if(url in asyncModuleStorage) return asyncModuleStorage[url];
         return asyncModuleStorage[url] = (async () => {
@@ -282,7 +246,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                 src = await downloadAsync(url);
                 const { keys, args, module, self } = argsAndExport(url);
                 const srcCompiled = this.skipTransform
-                    ? `module._module = async (${ keys.join() }) => {\n${ src }\n}`
+                    ? `module._module = async (${ keys.join() }) => {\n'use strict';\n${ src }\n}`
                     : getTransformFunc(true, keys)(src, transformUrlToFile(url), url);
                 const blob = new Blob([ srcCompiled ], { type: 'application/javascript' });
                 const blobUrl = URL.createObjectURL(blob);
@@ -297,7 +261,7 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                 args[reqIdx] = withCallAndApply(require, that);
                 args[aReqIdx] = withCallAndApply(requireAsync, that);
                 args[importMetaIdx].provider.raw = args[aReqIdx];
-                await f.call(self, ...args);
+                await f.apply(self, args);
                 await module._promise;
                 return await module.exports
             } catch(e){
@@ -310,21 +274,15 @@ Object.defineProperty(Object.getPrototypeOf(async () => {}), 'constructor', { va
                 const estack = e.stack.split('\n');
                 estack.splice(1, 0, addToStack);
                 e.stack = estack.join('\n');
-                console.error(e);
-                postMessage({
-                    error: `Cannot load module ${url}:\n${e.name}: ${e.message}`,
-                })
+                throw e
             }
         })()
     }
 
+    const { default: withLogger } = require('logger');
+
     return {
-        require: syncLogger(_ => require),
-        requireAsync: asyncLogger(_ => requireAsync),
-        requestAuth: asyncLogger(_ => requestAuth),
-        API,
-        MFC,
+        require: withLogger(_ => require),
+        requireAsync: withLogger(_ => requireAsync),
     }
 })();
-
-importScripts('./bitcoinjs-lib.js');

@@ -21,7 +21,7 @@ function onload(md){
     return md
 }
 
-requireAsync.call({ base: 'http://localhost', skipTransform: true }, 'https://cdn.jsdelivr.net/npm/markdown-it@11.0.0/dist/markdown-it.min.js').then(v => onload(v(...options))).then(markdown => {
+requireAsync('markdown-it').then(v => onload(v(...options))).then(markdown => {
     onmessage = async ({ data: { id, name, args } }) => {
         try{
             postMessage({ id, data: await markdown[name](...args) })
