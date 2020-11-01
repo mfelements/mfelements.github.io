@@ -199,7 +199,7 @@ dialog .buttons > span > button{
     width: calc(100% - (var(--container-padding) * 2));
     left: 0;
     padding: var(--container-padding);
-    z-index: 3;
+    z-index: 100;
 }
 
 .error-container:empty{
