@@ -1,7 +1,8 @@
 // list of predefined modules
 
 module._precompiled = {
-	'bitcoinjs-lib': 'https://cdn.jsdelivr.net/gh/mfelements/bitcoinjs-lib@v4.0.3-1/dist/index.js',
+	'bitcoinjs-lib': 'https://cdn.jsdelivr.net/gh/mfelements/bitcoinjs-lib@v4.0.3-2/dist/index.js',
+	'bitcoinjs-message': 'https://cdn.jsdelivr.net/gh/mfelements/bitcoinjs-message@v2.1.3-1/dist/index.js',
 	'markdown-it': 'https://cdn.jsdelivr.net/npm/markdown-it@11.0.0/dist/markdown-it.min.js',
 	logger: 'https://cdn.jsdelivr.net/gh/mfelements/logger@0.0.1/index.min.js',
 };
