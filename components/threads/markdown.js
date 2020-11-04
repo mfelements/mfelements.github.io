@@ -21,7 +21,7 @@ function onload(md){
     return md
 }
 
-requireAsync('markdown-it').then(v => onload(v(...options))).then(markdown => {
+requireAsync('@mfelements/markdown-it').then(v => onload(v(...options))).then(markdown => {
     onmessage = async ({ data: { id, name, args } }) => {
         try{
             postMessage({ id, data: await markdown[name](...args) })

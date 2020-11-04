@@ -19,7 +19,7 @@ const { require, requireAsync } = (() => {
 
     const globalModule = module;
 
-    const rand = require('rand');
+    const rand = require('@mfelements/rand');
 
     function namedObject(name){
         const obj = Object.create(null);
@@ -117,51 +117,47 @@ const { require, requireAsync } = (() => {
     function getTransformFunc(isAsync, args){
         if(!transformSrc){
             const { Babel } = globalThis;
-            if(Babel){
-                transformSrc = (src, filename, sourceFileName) => {
-                    const plugins = [
-                        Babel.availablePlugins['proposal-class-properties'],
-                        Babel.availablePlugins['proposal-private-methods'],
-                        [ Babel.availablePlugins['proposal-decorators'], { decoratorsBeforeExport: true } ],
-                    ];
-                    const settings = {
-                        presets: [
-                            Babel.availablePresets.es2017,
-                        ],
-                        plugins,
-                        ast: !!isAsync,
+            transformSrc = (src, filename, sourceFileName) => {
+                const plugins = [
+                    Babel.availablePlugins['proposal-class-properties'],
+                    Babel.availablePlugins['proposal-private-methods'],
+                    [ Babel.availablePlugins['proposal-decorators'], { decoratorsBeforeExport: true } ],
+                ];
+                const settings = {
+                    presets: [
+                        Babel.availablePresets.es2017,
+                    ],
+                    plugins,
+                    ast: !!isAsync,
+                    sourceMaps: 'inline',
+                    filename,
+                    sourceFileName,
+                    code: true,
+                    minified: true,
+                };
+                if(isAsync){
+                    plugins.push(Babel.availablePlugins['syntax-top-level-await']);
+                    const { ast, code: code0 } = Babel.transform(src, settings);
+                    const smUrl = code0.split('\n').pop().slice(21);
+                    const sm = JSON.parse(downloadSync(smUrl));
+                    settings.ast = false;
+                    settings.code = true;
+                    const { code } = Babel.transformFromAst(ast, {}, {
+                        presets: [],
+                        plugins: [ Babel.availablePlugins['es6-modules-mfwc-stage0'](importMetaKey, args) ],
+                        ast: false,
+                        code: true,
                         sourceMaps: 'inline',
                         filename,
                         sourceFileName,
-                        code: true,
+                        cloneInputAst: false,
                         minified: true,
-                    };
-                    if(isAsync){
-                        plugins.push(Babel.availablePlugins['syntax-top-level-await']);
-                        const { ast, code: code0 } = Babel.transform(src, settings);
-                        const smUrl = code0.split('\n').pop().slice(21);
-                        const sm = JSON.parse(downloadSync(smUrl));
-                        settings.ast = false;
-                        settings.code = true;
-                        const { code } = Babel.transformFromAst(ast, {}, {
-                            presets: [],
-                            plugins: [ Babel.availablePlugins['es6-modules-mfwc-stage0'](importMetaKey, args) ],
-                            ast: false,
-                            code: true,
-                            sourceMaps: 'inline',
-                            filename,
-                            sourceFileName,
-                            cloneInputAst: false,
-                            minified: true,
-                            inputSourceMap: sm,
-                        });
-                        return code
-                    }
-                    const { code } = Babel.transform(src, settings);
+                        inputSourceMap: sm,
+                    });
                     return code
                 }
-            } else {
-                transformSrc = s => s
+                const { code } = Babel.transform(src, settings);
+                return code
             }
         }
         return transformSrc
@@ -203,11 +199,19 @@ const { require, requireAsync } = (() => {
         })
     }
 
+    function getPredefinedModule(url, requirer){
+        if(url.startsWith('@mfelements/')){
+            const specifier = url.slice(12);
+            if(specifier in globalModule._predefined) return globalModule._predefined[specifier];
+            if(specifier in globalModule._precompiled) return requirer.call({ skipTransform: true }, globalModule._precompiled[specifier]);
+            if(specifier in globalModule._preconfigured) return requirer.call({}, globalModule._preconfigured[specifier]);
+        }
+        throw new Error(`No predefined module ${url} found`)
+    }
+
     function require(url){
         try{
-            if(url in globalModule._predefined) return globalModule._predefined[url];
-            if(url in globalModule._precompiled) return require.call({ skipTransform: true }, globalModule._precompiled[url]);
-            if(url in globalModule._preconfigured) return require.call({}, globalModule._preconfigured[url]);
+            try{ return getPredefinedModule(url, require) } catch(e){}
             url = new URL(url, this.base).href;
             if(url in syncModuleStorage) return syncModuleStorage[url];
             const src = downloadSync(url);
@@ -235,9 +239,7 @@ const { require, requireAsync } = (() => {
     }
 
     async function requireAsync(url){
-        if(url in globalModule._predefined) return globalModule._predefined[url];
-        if(url in globalModule._precompiled) return requireAsync.call({ skipTransform: true }, globalModule._precompiled[url]);
-        if(url in globalModule._preconfigured) return requireAsync.call({}, globalModule._preconfigured[url]);
+        try{ return getPredefinedModule(url, requireAsync) } catch(e){}
         url = new URL(url, this.base).href;
         if(url in asyncModuleStorage) return asyncModuleStorage[url];
         return asyncModuleStorage[url] = (async () => {
@@ -279,7 +281,7 @@ const { require, requireAsync } = (() => {
         })()
     }
 
-    const { default: withLogger } = require('logger');
+    const { default: withLogger } = require('@mfelements/logger');
 
     return {
         require: withLogger(_ => require),

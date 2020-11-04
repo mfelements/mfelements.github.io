@@ -2,9 +2,16 @@ import { getApiUrl } from '../components/api.js'
 import html, { Component } from '../components/preact.js'
 
 export default class extends Component{
+    constructor(props){
+        super(props);
+        this.state = {};
+        getApiUrl().then(apiUrl => this.setState({ apiUrl }))
+    }
     render(){
         const { logo, title, errorText, showLoadingText, show, color, textColor, transitionDelay } = this.props;
-        const logoUrl = new URL(logo, getApiUrl()).toString();
+        const { apiUrl } = this.state;
+        if(!apiUrl) return null;
+        const logoUrl = new URL(logo, apiUrl).toString();
         return html`
         <div class=loading-container-background style=${{
             opacity: +show,

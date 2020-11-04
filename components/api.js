@@ -1,14 +1,11 @@
-import withLog, { withName } from './logger/index.js'
-import Hostname from './hostname.js'
-import errorLog from './errorMessage.js'
 import * as elements from './elements.js'
-import fetch from './fetch.js'
 import NamedError from './namedError.js'
+import apiWorker from './api.worker.js'
 
 const intercepted = Object.create(null);
 const interceptedByUrl = Object.create(null);
 
-const RespError = withName('Response Error', class extends NamedError{});
+class ResponseError extends NamedError{}
 
 export class APICallOptions{
     constructor(opts){
@@ -31,11 +28,7 @@ export function unregisterActions(moduleUrl){
 }
 
 export function getApiUrl(){
-    const url = new URL('https://' + decodeURIComponent(location.pathname.slice(1)));
-    if(new Hostname(url.hostname).local) url.protocol = 'http';
-    let { href } = url;
-    if(!href.endsWith('/')) href += '/';
-    return href
+    return apiWorker.apiUrl
 }
 
 function checkProps(testData){
@@ -46,8 +39,8 @@ function checkProps(testData){
     }
 }
 
-function parseResult({ error, data }){
-    if(error) throw new RespError(error);
+export function parseResult({ error, data }){
+    if(error) throw new ResponseError(error);
     try{
         checkProps(data);
     } catch(e){
@@ -57,52 +50,24 @@ function parseResult({ error, data }){
     return data
 }
 
+export function isIntercepted(method){
+    return method in intercepted
+}
+
+export function callIntercepted(method, args){
+    return intercepted[method](...args)
+}
+
 export default class API{
     constructor(){
-        const apiUrl = getApiUrl();
         return new Proxy(Object.create(API.prototype), {
             get(_, p){
-                return withLog(console => withName('API.' + p, function(...data){
-                    const callOpts = {
-                        silent: false,
-                    };
-                    if(this instanceof APICallOptions) Object.assign(callOpts, this);
-                    if(p in intercepted){
-                        console.info('Intercepted action');
-                        return (async () => {
-                            try{
-                                return await intercepted[p](...data)
-                            } catch(e){
-                                throw callOpts.silent ? e : errorLog(e)
-                            }
-                        })()
-                    }
-                    const targetUrl = apiUrl + encodeURIComponent(p);
-                    const options = {
-                        method: data.length ? 'POST' : 'GET',
-                        mode: 'cors',
-                        cache: 'no-cache',
-                        redirect: 'follow',
-                    };
-                    if(data.length) options.body = JSON.stringify(data);
-                    return fetch(targetUrl, options)
-                        .then(async r => {
-                            try{
-                                return await r.json()
-                            } catch(e){
-                                throw new TypeError('response is not in JSON format')
-                            }
-                        })
-                        .catch(e => {
-                            e.message = `Cannot communicate with ${targetUrl}: ${e.message}`;
-                            throw e
-                        })
-                        .then(parseResult)
-                        .catch(e => {
-                            e.name = `API ${e.name}`;
-                            throw callOpts.silent ? e : errorLog(e)
-                        })
-                }))
+                if(!(p in _)) _[p] = function(...args){
+                    const opts = {};
+                    if(this instanceof APICallOptions) Object.assign(opts, this);
+                    return apiWorker.callMethod(opts, p, args)
+                };
+                return _[p]
             }
         })
     }

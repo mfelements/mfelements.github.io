@@ -77,15 +77,13 @@ const registerAction = (() => {
             } catch(e){
                 postMessage({ id, error: e.message, errorName: e.name })
             }
-        } else if(actionResult || actionError){
-            if(id in module.actionStorage){
-                if(actionError){
-                    const e = new Error(actionError);
-                    e.name = actionErrorName || 'Error';
-                    module.actionStorage[id].reject(e)
-                }
-                else module.actionStorage[id].resolve(actionResult)
+        } else if(id in module.actionStorage){
+            if(actionError){
+                const e = new Error(actionError);
+                e.name = actionErrorName || 'Error';
+                module.actionStorage[id].reject(e)
             }
+            else module.actionStorage[id].resolve(actionResult)
         }
     };
 

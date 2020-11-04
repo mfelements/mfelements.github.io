@@ -1,7 +1,7 @@
 import { threads } from './paths.js'
 import { processActions } from './thread.js'
 
-const worker = new Worker(threads + '/markdown.js');
+const worker = new Worker(threads + '/api.js');
 
 const callStorage = Object.create(null);
 
@@ -11,7 +11,7 @@ function createCallId(){
     return createCallId()
 }
 
-let loadModule, moduleError;
+let loadModule, moduleError, apiUrl;
 
 const callMethodP = new Promise((resolve, reject) => {
     loadModule = resolve;
@@ -19,28 +19,37 @@ const callMethodP = new Promise((resolve, reject) => {
 });
 
 worker.onmessage = async ({ data }) => {
-    if(data === 'MODULE_LOAD'){
-        worker.onmessage = ({ data: { id, error, data } }) => {
+    if(data.data === 'MODULE_LOAD'){
+        worker.onmessage = ({ data: params }) => {
+            const { id, error, data } = params;
             if(id in callStorage){
                 const { resolve, reject } = callStorage[id];
                 delete callStorage[id];
                 if(error) reject(error);
                 else resolve(data)
-            }
+            } else processActions(worker, params);
         };
-        loadModule((name, ...args) => new Promise((resolve, reject) => {
+        apiUrl = data.url;
+        loadModule((opts, name, args) => new Promise((resolve, reject) => {
             const id = createCallId();
             callStorage[id] = { resolve, reject };
-            worker.postMessage({ id, name, args })
+            worker.postMessage({ id, name, args, opts })
         }))
     } else if(await processActions(worker, data));
     else moduleError(data)
 }
 
-export async function render(...args){
-    return (await callMethodP)('render', ...args)
-}
+worker.callMethod = async (opts, name, args) => {
+    return (await callMethodP)(opts, name, args)
+};
 
-export async function renderInline(...args){
-    return (await callMethodP)('renderInline', ...args)
-}
+worker.apiUrl = new Promise(async (resolve, reject) => {
+    try{
+        await callMethodP;
+        resolve(apiUrl)
+    } catch(e){
+        reject(e)
+    }
+});
+
+export default worker

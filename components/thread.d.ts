@@ -1,1 +1,4 @@
-export default function createThread(url: string): Promise<void>
+export default function createThread(url: string): {
+    loaded: Promise<void>;
+    destroy: () => void;
+}
