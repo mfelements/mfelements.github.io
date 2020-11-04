@@ -72,7 +72,6 @@ export default class App extends Component{
         return html`
             <${Head}>
                 <link rel=stylesheet href="${css}/main.css"/>
-                <link rel=stylesheet href="${css}/theme.light.css"/>
                 <link rel=icon href=${serviceLogo || mfeLogo}/>
                 ${!generated || generated._M_dummy ? html`<title>${serviceTitle || title}</>` : null}
             </>

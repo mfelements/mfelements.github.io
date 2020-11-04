@@ -4,6 +4,102 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <style>
+        :root{
+            --mfe-logo: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNTYuMDAxIiBoZWlnaHQ9IjI1Ni4wMDEiIGZpbGw9Im5vbmUiPjxwYXRoIGQ9Ik0xMTIuMTYyIDU2YTE1Ljk1OCAxNS45NTggMCAwMC05Ljg5IDMuMjk4TDY0IDg4IDI1LjczIDU5LjNhMTUuOTYgMTUuOTYgMCAwMC0xMC41NjYtMy4yNzggMTUuOTExIDE1LjkxMSAwIDAwLTYuMzIgMS42NjYgMTUuOTA3IDE1LjkwNyAwIDAwLTUuMTI1IDQuMDU3QTE1Ljk3MiAxNS45NzIgMCAwMDAgNzIuMTYzdjExMS44MzhjMCA4LjgzNyA3LjE2MyAxNiAxNiAxNnMxNi03LjE2MyAxNi0xNnYtODBsMjIuMTE1IDE2LjU4OGExNi4wMjYgMTYuMDI2IDAgMDAxNi42OTUgMS44OTcgMTUuODk3IDE1Ljg5NyAwIDAwMy4wNzUtMS44OTdMMTE3LjMzNCA4OEgyNDBjOC44MzcgMCAxNi03LjE2MyAxNi0xNnMtNy4xNjMtMTYtMTYtMTZoLTkzLjM5M3pNMTkyIDEyMGMtMS4xMDQgMC0yLjE4NC4xMTItMy4yMjUuMzI1LTcuMjkgMS40OTItMTIuNzc1IDcuOTQ0LTEyLjc3NSAxNS42NzZ2NDhjMCA4LjgzNyA3LjE2NCAxNiAxNiAxNmg0OGM4LjgzNyAwIDE2LTcuMTYzIDE2LTE2cy03LjE2My0xNi0xNi0xNmgtMzJ2LTE2aDE2YzguODM3IDAgMTYtNy4xNjMgMTYtMTZzLTcuMTYzLTE2LTE2LTE2aC0zMS45ODh6IiBmaWxsPSIjZmZmIi8+PHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik05Ni4wMDIgMTg0LjAwMmMwIDguODM3IDcuMTYzIDE2IDE2IDE2IDguODM2IDAgMTYtNy4xNjMgMTYtMTZ2LTMyaDE2YzguODM2IDAgMTYtNy4xNjMgMTYtMTYgMC04LjgzNi03LjE2NC0xNi0xNi0xNkgxMTJjLTEuMTA0IDAtMi4xODMuMTEyLTMuMjI0LjMyNi03LjI5IDEuNDkxLTEyLjc3NSA3Ljk0Mi0xMi43NzUgMTUuNjc0eiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==);
+        }
+    </style>
+    <style>
+        html{
+            --theme-color: #4a5464;
+            --theme-light-color: #768092;
+            --theme-dark-color: #212b3a;
+            --bg-primary: #f7f7f7;
+            --bg-secondary: #fff;
+            --text-color: #000;
+            --text-mid-color: #fff;
+            --text-light-color: #000;
+            --text-dark-color: #fff;
+            --btn-shadow:
+                0 -0.5rem 1rem rgba(255, 255, 255, 0.5),
+                0 0.5rem 1rem rgba(221, 221, 221, 0.25);
+            --block-shadow:
+                0px 3px 5px -1px rgba(0, 0, 0, 0.2),
+                0px 6px 10px 0px rgba(0, 0, 0, 0.14),
+                0px 1px 18px 0px rgba(0,0,0,.12);
+            --transition-speed: .2s;
+            --border-radius: .28rem;
+            --invert-amount: 0%;
+            --live-record-color: #f00;
+        }
+    </style>
+    <style>
+        html{
+            background-color: var(--theme-color);
+            transition: 0;
+            transition-delay: .1s;
+        }
+
+        .loading-container,
+        .loading-container-background{
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition-duration: 1s;
+            transition-property: opacity;
+            z-index: 99;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loading-container-background{
+            background-color: #000;
+        }
+
+        .loading-container > .logo{
+            min-width: 185px;
+            max-width: 300px;
+            width: 40%;
+        }
+
+        .loading-container > .logo > .logo-image{
+            width: 100%;
+            position: relative;
+            padding-bottom: 100%;
+        }
+
+        .loading-container > .logo > .logo-image > div{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: var(--mfe-logo);
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .loading-container > .logo .title{
+            font-size: 2rem;
+            height: 1.5em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+        }
+
+        .loading-container > .loading-text{
+            font-size: 1.5rem;
+            height: 4em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+        }
+    </style>
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@400;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">

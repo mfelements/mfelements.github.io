@@ -10,8 +10,7 @@ export default class extends Component{
     render(){
         const { logo, title, errorText, showLoadingText, show, color, textColor, transitionDelay } = this.props;
         const { apiUrl } = this.state;
-        if(!apiUrl) return null;
-        const logoUrl = new URL(logo, apiUrl).toString();
+        const logoUrl = apiUrl && new URL(logo, apiUrl).toString();
         return html`
         <div class=loading-container-background style=${{
             opacity: +show,
@@ -25,7 +24,7 @@ export default class extends Component{
             pointerEvents: show ? 'all' : 'none',
         }}>
             <div class=logo>
-                <img src=${logoUrl}/>
+                <div class=logo-image><div style=${{ backgroundImage: logoUrl && `url(${logoUrl})` }}/></>
                 <div class=title>${title}</>
             </>
             <div
