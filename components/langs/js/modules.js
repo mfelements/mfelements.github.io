@@ -134,6 +134,10 @@ module._predefined = (() => {
 		})),
 	}
 
+	const canvaskitCDNRoot = 'https://unpkg.com/canvaskit-wasm@0.18.1/bin/';
+
+	let canvaskit;
+
 	return {
 		rand,
 		get 'service-api'(){
@@ -154,6 +158,33 @@ module._predefined = (() => {
 					id
 				});
 			})
+		},
+		get canvaskit(){
+			if(!canvaskit){
+				const document = {
+					createElement(){
+						const e = {
+							click(){
+								mainThreadAction('downloadFile', e.href, e.download)
+							},
+							remove(){}
+						}
+						return e
+					},
+					body: {
+						appendChild(){}
+					}
+				};
+				function F(...args){
+					return new Function('window', ...args).bind(self, self)
+				}
+				F.prototype = Object.create(Function);
+				Object.defineProperty(F, Symbol.hasInstance, { value: i => i instanceof Function });
+				canvaskit = requireAsync.call({ skipTransform: true, additionalScope: { Function: F, window: self, document } }, canvaskitCDNRoot + 'canvaskit.js')
+					.then(init => init({ locateFile: f => canvaskitCDNRoot + f }))
+					.then(v => __esModule({ default: v }));
+			}
+			return canvaskit
 		},
 	}
 })();
