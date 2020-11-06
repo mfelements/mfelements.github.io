@@ -40,6 +40,14 @@ const actions = {
     callIntercepted,
     parseResult,
     errorLog,
+    downloadFile(url, name){
+        const a = document.createElement('a');
+        document.body.appendChild(a);
+        a.href = url;
+        a.download = name;
+        a.click();
+        setTimeout(() => a.remove(), 50)
+    },
 }
 
 async function _processActions(worker, params){
