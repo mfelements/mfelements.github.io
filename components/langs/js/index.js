@@ -80,7 +80,7 @@ const { require, requireAsync } = (() => {
 
     const importMetaKey = argsName + '_importMeta';
 
-    function argsAndExport(__filename){
+    function argsAndExport(__filename, additionalScope){
         const __dirname = dirname(__filename);
         const exports = namedObject('Module');
         const module = { exports };
@@ -100,7 +100,7 @@ const { require, requireAsync } = (() => {
             }),
             Function: _Function,
             AsyncFunction: _Function,
-        });
+        }, additionalScope);
         args.self = args;
         const keys = Object.keys(args);
         for(const i in args) if(args[i] === undefined) delete args[i];
@@ -215,7 +215,7 @@ const { require, requireAsync } = (() => {
             url = new URL(url, this.base).href;
             if(url in syncModuleStorage) return syncModuleStorage[url];
             const src = downloadSync(url);
-            const { keys, args, module, self } = argsAndExport(url);
+            const { keys, args, module, self } = argsAndExport(url, this.additionalScope || {});
             const srcCompiled = this.skipTransform
                 ? `module._module = (${ keys.join() }) => {\n'use strict';\n${ src }\n}`
                 : getTransformFunc()(src, transformUrlToFile(url), url);
@@ -246,7 +246,7 @@ const { require, requireAsync } = (() => {
             let src;
             try{
                 src = await downloadAsync(url);
-                const { keys, args, module, self } = argsAndExport(url);
+                const { keys, args, module, self } = argsAndExport(url, this.additionalScope || {});
                 const srcCompiled = this.skipTransform
                     ? `module._module = async (${ keys.join() }) => {\n'use strict';\n${ src }\n}`
                     : getTransformFunc(true, keys)(src, transformUrlToFile(url), url);
