@@ -159,6 +159,12 @@ module._predefined = (() => {
 				});
 			})
 		},
+		async 'download-file'(blob, name){
+			const url = URL.createObjectURL(blob);
+			mainThreadAction('downloadFile', url, name);
+			await sleep(50);
+			URL.revokeObjectURL(url)
+		},
 		get canvaskit(){
 			if(!canvaskit){
 				const document = {
