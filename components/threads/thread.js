@@ -60,7 +60,7 @@ const registerAction = (() => {
 
     const registeredActions = Object.create(null);
 
-    onmessage = async ({ data: { requireScript, action, id, actionResult, actionError, actionErrorName, lang, langv } }) => {
+    onmessage = async ({ data: { requireScript, action, id, actionResult, actionError, actionErrorName, lang, langv, stream, method, args } }) => {
         if(requireScript){
             try{
                 const langstr = (langsSupported[lang] || langsSupported.default).getFullVersion(langv || '');
@@ -76,6 +76,16 @@ const registerAction = (() => {
                 postMessage({ id, data: await registeredActions[name](...args) })
             } catch(e){
                 postMessage({ id, error: e.message, errorName: e.name })
+            }
+        } else if(stream){
+            try{
+                module.streamStorage[stream][method](...args)
+            } catch(e){
+                postMessage({
+                    method: 'throwError',
+                    args: [{ name: e.name, message: e.message }],
+                    stream,
+                })
             }
         } else if(id in module.actionStorage){
             if(actionError){

@@ -13,7 +13,8 @@ module._preconfigured = {
 	'logger/decorated': 'https://cdn.jsdelivr.net/gh/mfelements/logger@0.0.4/decorated.min.js',
 	bit64: 'https://cdn.jsdelivr.net/gh/mfelements/bit64@v0.0.1/index.min.js',
 	hostname: 'https://cdn.jsdelivr.net/gh/mfelements/hostname@v0.0.1/index.min.js',
-	'_internal/fetch': new URL('../../components/fetch.js', location.href).href,
+	fetch: new URL('../../components/fetch.js', location.href).href,
+	stream: new URL('../../components/stream.js', location.href).href,
 };
 
 module._predefined = (() => {
@@ -55,12 +56,12 @@ module._predefined = (() => {
 
 	const logger = importModule('@mfelements/logger');
 
-	/** @namespace*/
+	/** @namespace */
 	const ServiceAPI = {
 		downloadModules(){
 			ServiceAPI.modules = {
 				hostname: importModule('@mfelements/hostname').then(v => v.default),
-				fetch: importModule('@mfelements/_internal/fetch').then(v => v.default),
+				fetch: importModule('@mfelements/fetch').then(v => v.default),
 			};
 			ServiceAPI.url = ServiceAPI.getApiUrl()
 		},
@@ -136,7 +137,11 @@ module._predefined = (() => {
 
 	const canvaskitCDNRoot = 'https://unpkg.com/canvaskit-wasm@0.18.1/bin/';
 
-	let canvaskit;
+	const moduleCache = Object.create(null);
+
+	const moduleRoot = {
+		userMedia: 'https://cdn.jsdelivr.net/gh/mfelements/UserMedia@v0.0.1/index.min.js',
+	};
 
 	return {
 		rand,
@@ -166,7 +171,7 @@ module._predefined = (() => {
 			URL.revokeObjectURL(url)
 		},
 		get canvaskit(){
-			if(!canvaskit){
+			if(!('canvaskit' in moduleCache)){
 				const document = {
 					createElement(){
 						const e = {
@@ -186,11 +191,27 @@ module._predefined = (() => {
 				}
 				F.prototype = Object.create(Function);
 				Object.defineProperty(F, Symbol.hasInstance, { value: i => i instanceof Function });
-				canvaskit = requireAsync.call({ skipTransform: true, additionalScope: { Function: F, window: self, document } }, canvaskitCDNRoot + 'canvaskit.js')
+				moduleCache.canvaskit = requireAsync.call({ skipTransform: true, additionalScope: { Function: F, window: self, document } }, canvaskitCDNRoot + 'canvaskit.js')
 					.then(init => init({ locateFile: f => canvaskitCDNRoot + f }))
 					.then(v => __esModule({ default: v }));
 			}
-			return canvaskit
+			return moduleCache.canvaskit
 		},
+		get 'user-media'(){
+			if(!('userMedia' in moduleCache)) moduleCache.userMedia = requireAsync.call({
+				additionalScope: {
+					streamStorage: module.streamStorage,
+					mainThreadAction,
+					endStream(id){
+						postMessage({
+							stream: id,
+							method: 'end',
+							args: [],
+						})
+					},
+				}
+			}, moduleRoot.userMedia);
+			return moduleCache.userMedia
+		}
 	}
 })();
