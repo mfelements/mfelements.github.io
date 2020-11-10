@@ -1,6 +1,9 @@
 'use strict';
 
-const module = { actionStorage: Object.create(null) };
+const module = {
+    actionStorage: Object.create(null),
+    streamStorage: Object.create(null),
+};
 
 const globalThis = this;
 
@@ -112,55 +115,50 @@ const { require, requireAsync } = (() => {
         }
     }
 
-    let transformSrc;
-
     function getTransformFunc(isAsync, args){
-        if(!transformSrc){
-            const { Babel } = globalThis;
-            transformSrc = (src, filename, sourceFileName) => {
-                const plugins = [
-                    Babel.availablePlugins['proposal-class-properties'],
-                    Babel.availablePlugins['proposal-private-methods'],
-                    [ Babel.availablePlugins['proposal-decorators'], { decoratorsBeforeExport: true } ],
-                ];
-                const settings = {
-                    presets: [
-                        Babel.availablePresets.es2017,
-                    ],
-                    plugins,
-                    ast: !!isAsync,
+        const { Babel } = globalThis;
+        return (src, filename, sourceFileName) => {
+            const plugins = [
+                Babel.availablePlugins['proposal-class-properties'],
+                Babel.availablePlugins['proposal-private-methods'],
+                [ Babel.availablePlugins['proposal-decorators'], { decoratorsBeforeExport: true } ],
+            ];
+            const settings = {
+                presets: [
+                    Babel.availablePresets.es2017,
+                ],
+                plugins,
+                ast: !!isAsync,
+                sourceMaps: 'inline',
+                filename,
+                sourceFileName,
+                code: true,
+                minified: true,
+            };
+            if(isAsync){
+                plugins.push(Babel.availablePlugins['syntax-top-level-await']);
+                const { ast, code: code0 } = Babel.transform(src, settings);
+                const smUrl = code0.split('\n').pop().slice(21);
+                const sm = JSON.parse(downloadSync(smUrl));
+                settings.ast = false;
+                settings.code = true;
+                const { code } = Babel.transformFromAst(ast, {}, {
+                    presets: [],
+                    plugins: [ Babel.availablePlugins['es6-modules-mfwc-stage0'](importMetaKey, args) ],
+                    ast: false,
+                    code: true,
                     sourceMaps: 'inline',
                     filename,
                     sourceFileName,
-                    code: true,
+                    cloneInputAst: false,
                     minified: true,
-                };
-                if(isAsync){
-                    plugins.push(Babel.availablePlugins['syntax-top-level-await']);
-                    const { ast, code: code0 } = Babel.transform(src, settings);
-                    const smUrl = code0.split('\n').pop().slice(21);
-                    const sm = JSON.parse(downloadSync(smUrl));
-                    settings.ast = false;
-                    settings.code = true;
-                    const { code } = Babel.transformFromAst(ast, {}, {
-                        presets: [],
-                        plugins: [ Babel.availablePlugins['es6-modules-mfwc-stage0'](importMetaKey, args) ],
-                        ast: false,
-                        code: true,
-                        sourceMaps: 'inline',
-                        filename,
-                        sourceFileName,
-                        cloneInputAst: false,
-                        minified: true,
-                        inputSourceMap: sm,
-                    });
-                    return code
-                }
-                const { code } = Babel.transform(src, settings);
+                    inputSourceMap: sm,
+                });
                 return code
             }
+            const { code } = Babel.transform(src, settings);
+            return code
         }
-        return transformSrc
     }
 
     function transformUrlToFile(a){
