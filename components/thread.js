@@ -138,12 +138,16 @@ const actions = {
             video: true,
             audio: options.type !== 'imageData' && !!options.audio
         });
+        const metadata = mediaStream.getVideoTracks()[0].getSettings();
         switch(options.type){
             case 'imageData':
-                return transformMediaStreamToImageData(this, mediaStream, streamId);
+                transformMediaStreamToImageData(this, mediaStream, streamId);
+                break;
             default:
-                return transformMediaStreamToBinary(this, mediaStream, streamId, options.type)
+                transformMediaStreamToBinary(this, mediaStream, streamId, options.type);
+                break;
         }
+        return metadata
     },
 }
 
