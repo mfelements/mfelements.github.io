@@ -15,6 +15,7 @@ module._preconfigured = {
 	hostname: 'https://cdn.jsdelivr.net/gh/mfelements/hostname@v0.0.1/index.min.js',
 	fetch: new URL('../../components/fetch.js', location.href).href,
 	stream: new URL('../../components/stream.js', location.href).href,
+	'user-media/canvas-wrapper': 'https://cdn.jsdelivr.net/gh/mfelements/UserMedia@v0.0.3/canvas-wrapped.min.js',
 };
 
 module._predefined = (() => {
@@ -140,7 +141,7 @@ module._predefined = (() => {
 	const moduleCache = Object.create(null);
 
 	const moduleRoot = {
-		userMedia: 'https://cdn.jsdelivr.net/gh/mfelements/UserMedia@v0.0.2/index.min.js',
+		userMedia: 'https://cdn.jsdelivr.net/gh/mfelements/UserMedia@v0.0.3/index.min.js',
 	};
 
 	return {
