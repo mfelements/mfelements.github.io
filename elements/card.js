@@ -40,7 +40,7 @@ export default class Card extends Button{
         this.observer.observe(this.base)
     }
     componentWillUnmount(){
-        this.observer.unobserve();
+        this.observer.unobserve(this.base);
         this.observer = null
     }
     render(){
