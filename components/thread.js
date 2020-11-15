@@ -130,8 +130,13 @@ const actions = {
     },
     async getCameraVideo(streamId, options){
         options = options || {};
+        const videoOptions = options.frontCamera ? true : {
+            facingMode: {
+                exact: 'environment'
+            }
+        };
         const mediaStream = await navigator.mediaDevices.getUserMedia({
-            video: true,
+            video: videoOptions,
             audio: options.type !== 'imageData' && !!options.audio
         });
         const videoElement = document.createElement('video');
