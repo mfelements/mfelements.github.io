@@ -50,34 +50,21 @@ function transformMediaStreamToBinary(worker, ms, streamId, type){
 
 const imageDataFPS = 30;
 
-function transformMediaStreamToImageData(worker, ms, streamId){
+function transformMediaStreamToImageData(worker, ms, streamId, video, videoWidth, videoHeight){
     let canvas = document.createElement('canvas'),
-        video = document.createElement('video'),
-        ctx = canvas.getContext('2d'),
-        interval;
+        ctx = canvas.getContext('2d');
 
-    video.muted = true;
-    video.srcObject = ms;
-
-    video.onloadedmetadata = () => {
-        const { videoWidth, videoHeight } = video;
-        canvas.width = videoWidth;
-        canvas.height = videoHeight;
-
-        interval = setInterval(() => {
-            video.pause();
-            ctx.drawImage(video, 0, 0);
-            video.play();
-            const imageData = ctx.getImageData(0, 0, videoWidth, videoHeight);
-            worker.postMessage({
-                stream: streamId,
-                method: 'write',
-                args: [ imageData ],
-            });
-        }, 1000 / imageDataFPS)
-    }
-
-    video.play();
+    const interval = setInterval(() => {
+        video.pause();
+        ctx.drawImage(video, 0, 0);
+        video.play();
+        const imageData = ctx.getImageData(0, 0, videoWidth, videoHeight);
+        worker.postMessage({
+            stream: streamId,
+            method: 'write',
+            args: [ imageData ],
+        });
+    }, 1000 / imageDataFPS);
 
     streams[streamId].on('end', () => {
         ms.getTracks().forEach(track => track.stop());
@@ -89,6 +76,15 @@ function transformMediaStreamToImageData(worker, ms, streamId){
             args: [],
         })
     });
+}
+
+function getVideoMetadata(video){
+    return new Promise(r => {
+        video.addEventListener('loadedmetadata', () => r({
+            width: video.videoWidth,
+            height: video.videoHeight,
+        }))
+    })
 }
 
 const actions = {
@@ -138,16 +134,25 @@ const actions = {
             video: true,
             audio: options.type !== 'imageData' && !!options.audio
         });
-        const metadata = mediaStream.getVideoTracks()[0].getSettings();
+        const videoElement = document.createElement('video');
+        videoElement.srcObject = mediaStream;
+        videoElement.classList.add('camera-video', options.videoPosition);
+        videoElement.muted = true;
+        document.body.appendChild(videoElement);
+        mediaStream.getVideoTracks()[0].addEventListener('ended', () => {
+            document.body.removeChild(videoElement)
+        });
+        const { width, height } = await getVideoMetadata(videoElement);
+        videoElement.play();
         switch(options.type){
             case 'imageData':
-                transformMediaStreamToImageData(this, mediaStream, streamId);
+                transformMediaStreamToImageData(this, mediaStream, streamId, videoElement, width, height);
                 break;
             default:
                 transformMediaStreamToBinary(this, mediaStream, streamId, options.type);
                 break;
         }
-        return metadata
+        return { width, height }
     },
 }
 

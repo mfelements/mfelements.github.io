@@ -429,6 +429,18 @@ button.md-btn, .block, div.tblock, .image{
     --font-size: var(--font-size-override, 1rem);
 }
 
+.camera-video{
+    background-color: #000;
+}
+
+.camera-video.fullscreen{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
 /* mobile styles */
 
 @media (max-width: 520px){

@@ -213,6 +213,6 @@ module._predefined = (() => {
 				}
 			}, moduleRoot.userMedia);
 			return moduleCache.userMedia
-		}
+		},
 	}
 })();
