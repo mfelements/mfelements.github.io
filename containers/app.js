@@ -18,6 +18,8 @@ const logoDisplayTimeout = 1000,
 
 export default class App extends Component{
     constructor(props){
+        console.groupCollapsed('Application startup');
+        const start = Date.now();
         super(props);
         this[api] = new API;
         const themeColor = '#4a5464';
@@ -26,7 +28,12 @@ export default class App extends Component{
             title: 'MFElements',
             mfeThemeColor: themeColor,
             mfeTextColor: Colors.toString(Colors.textColor(Colors.toColor(themeColor))),
-        }
+        };
+        new Promise((r => this._loadAppTitle = r)).then(appName => {
+            console.info('Service %c%s%c loaded successfully in %c%fs', 'font-weight: bold; color: #1162ce', appName, '', 'font-weight: bold; color: gray', Math.round((Date.now() - start) / 100) / 10);
+            console.groupEnd();
+            console.group('Service logs')
+        })
     }
     async componentDidMount(){
         currentApp = this;
@@ -68,12 +75,14 @@ export default class App extends Component{
     render(){
         const { generated, error, serviceLogo, mfeLogo, showLoadingIndexText, serviceLogoTimeoutDone, title, serviceTitle, mfeThemeColor, mfeTextColor, themeColor, textColor } = this.state;
         const doShowServiceLoading = !!((generated && generated._M_dummy) || !serviceLogoTimeoutDone),
-            doShowMFELoading = !generated && doShowServiceLoading;
+            doShowMFELoading = !generated && doShowServiceLoading,
+            generateDone = generated && !generated._M_dummy;
+        if(generateDone) setTimeout(() => { this._loadAppTitle(document.head.getElementsByTagName('title')[0].innerText) });
         return html`
             <${Head}>
                 <link rel=stylesheet href="${css}/main.css"/>
                 <link rel=icon href=${serviceLogo || mfeLogo}/>
-                ${!generated || generated._M_dummy ? html`<title>${serviceTitle || title}</>` : null}
+                ${generateDone ? null : html`<title>${serviceTitle || title}</>`}
             </>
             ${generated}
             <${LoadingComponent}
