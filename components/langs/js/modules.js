@@ -141,7 +141,7 @@ module._predefined = (() => {
 	const moduleCache = Object.create(null);
 
 	const moduleRoot = {
-		userMedia: 'https://cdn.jsdelivr.net/gh/mfelements/UserMedia@v0.0.3/index.min.js',
+		userMedia: 'https://cdn.jsdelivr.net/gh/mfelements/UserMedia@v0.0.4/index.min.js',
 	};
 
 	return {
