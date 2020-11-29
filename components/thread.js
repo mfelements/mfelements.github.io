@@ -87,6 +87,31 @@ function getVideoMetadata(video){
     })
 }
 
+function getMediaStreamImageDataGetter(video){
+    const canvas = document.createElement('canvas'),
+        ctx = canvas.getContext('2d');
+    return () => {
+        video.pause();
+        ctx.drawImage(video, 0, 0);
+        video.play();
+        const imageData = ctx.getImageData(0, 0, video.videoWidth, video.videoHeight);
+        return { value: imageData, done: false }
+    }
+}
+
+function getMediaStreamBinaryDataGetter(mediaStream){
+}
+
+function bindMediaStreamToStream(mediaStream, videoSrc, stream, format){
+    stream._stopHandler = () => {
+        mediaStream.getTracks().forEach(track => track.stop())
+    };
+    Object.defineProperty(stream, 'current', {
+        get: format === 'imageData' ? getMediaStreamImageDataGetter(videoSrc) : getMediaStreamBinaryDataGetter(mediaStream),
+        configurable: true
+    })
+}
+
 const actions = {
     registerAction({ name }){
         registerAction(this.scriptUrl, name, (...args) => new Promise((resolve, reject) => {
@@ -128,16 +153,38 @@ const actions = {
         streams[id] = new Stream;
         return id
     },
-    async getCameraVideo(streamId, options){
-        options = options || {};
-        const videoOptions = options.frontCamera ? true : {
-            facingMode: {
-                exact: 'environment'
+    createDirtyStream(){
+        const id = createActionId(streams);
+        streams[id] = {
+            write(value){
+                streams[id].current = { value, done: false }
+            },
+            end(){
+                if(streams[id]._stopHandler) streams[id]._stopHandler();
+                delete streams[id]
             }
         };
+        return id
+    },
+    getStreamChunk(id){
+        if(!streams[id]) return { value: undefined, done: true };
+        return streams[id].current
+    },
+    stopStream(id){
+        streams[id].end()
+    },
+    async getCameraVideo(streamId, options){
+        options = options || {};
         const mediaStream = await navigator.mediaDevices.getUserMedia({
-            video: videoOptions,
-            audio: options.type !== 'imageData' && !!options.audio
+            video: {
+                // up to 4k
+                width: { ideal: 4096 },
+                height: { ideal: 2160 },
+                facingMode: {
+                    ideal: options.frontCamera ? 'user' : 'environment'
+                },
+            },
+            audio: options.type !== 'imageData' && !!options.audio,
         });
         const videoElement = document.createElement('video');
         videoElement.srcObject = mediaStream;
@@ -149,14 +196,7 @@ const actions = {
         });
         const { width, height } = await getVideoMetadata(videoElement);
         videoElement.play();
-        switch(options.type){
-            case 'imageData':
-                transformMediaStreamToImageData(this, mediaStream, streamId, videoElement, width, height);
-                break;
-            default:
-                transformMediaStreamToBinary(this, mediaStream, streamId, options.type);
-                break;
-        }
+        bindMediaStreamToStream(mediaStream, videoElement, streams[streamId], options.type);
         return { width, height }
     },
 }
