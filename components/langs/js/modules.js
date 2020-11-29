@@ -144,6 +144,40 @@ module._predefined = (() => {
 		userMedia: 'https://cdn.jsdelivr.net/gh/mfelements/UserMedia@v0.0.4/index.min.js',
 	};
 
+	const hasInstance = Object[Symbol.hasInstance];
+
+	function getClassName(obj){
+		const proto = Object.getPrototypeOf(obj);
+		const { name } = proto.constructor;
+		return name || getClassName(proto)
+	}
+
+	class _internal{
+		constructor(){
+			throw new TypeError(`Cannot construct ${getClassName(this)} directly`)
+		}
+	}
+
+	class ReadableStream extends _internal{
+		async *[Symbol.asyncIterator](){}
+		async stop(){}
+		catch(){}
+		static [Symbol.hasInstance](instance){
+			return hasInstance.call(ReadableStream, instance) || instance instanceof DuplexStream
+		}
+	}
+
+	class WritableStream extends _internal{
+		async next(){}
+		async throw(){}
+		async stop(){}
+	}
+
+	class DuplexStream extends WritableStream{
+		async *[Symbol.asyncIterator](){}
+		catch(){}
+	}
+
 	return {
 		rand,
 		get 'service-api'(){
@@ -214,5 +248,10 @@ module._predefined = (() => {
 			}, moduleRoot.userMedia);
 			return moduleCache.userMedia
 		},
+		'stream-definitions': __esModule({
+			ReadableStream,
+			WritableStream,
+			DuplexStream,
+		}),
 	}
 })();
