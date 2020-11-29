@@ -124,9 +124,6 @@ const { require, requireAsync } = (() => {
                 [ Babel.availablePlugins['proposal-decorators'], { decoratorsBeforeExport: true } ],
             ];
             const settings = {
-                presets: [
-                    Babel.availablePresets.es2017,
-                ],
                 plugins,
                 ast: !!isAsync,
                 sourceMaps: 'inline',
