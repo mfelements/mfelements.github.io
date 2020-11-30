@@ -7,6 +7,9 @@ import Stream from './stream.js'
 
 const actionStorage = Object.create(null);
 const streams = Object.create(null);
+const importedModules = Object.create(null);
+const callbacks = Object.create(null);
+const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
 
 function createActionId(storage = actionStorage){
     const id = Math.random().toString(36).substring(2, 15);
@@ -100,6 +103,7 @@ function getMediaStreamImageDataGetter(video){
 }
 
 function getMediaStreamBinaryDataGetter(mediaStream){
+    //
 }
 
 function bindMediaStreamToStream(mediaStream, videoSrc, stream, format){
@@ -198,6 +202,22 @@ const actions = {
         videoElement.play();
         bindMediaStreamToStream(mediaStream, videoElement, streams[streamId], options.type);
         return { width, height }
+    },
+    async nativeImport(url){
+        const id = createActionId(importedModules);
+        importedModules[id] = { module: await import(url), storage: Object.create(null) };
+        return id
+    },
+    moduleExec(id, code){
+        return new AsyncFunction('module', 'moduleStorage', 'getCallback', 'rand', code)(importedModules[id].module, importedModules[id].storage, id => callbacks[id], createActionId.bind(null, {}))
+    },
+    registerCallback(id){
+        callbacks[id] = (...args) => {
+            this.postMessage({ stream: id, method: 'next', args })
+        }
+    },
+    unregisterCallback(id){
+        delete callbacks[id]
     },
 }
 
