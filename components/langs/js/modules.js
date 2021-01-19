@@ -9,7 +9,7 @@ module._precompiled = {
 
 module._preconfigured = {
 	'electrumx-api': '',
-	'wallet-api': '',
+	'wallet-api': 'https://cdn.jsdelivr.net/gh/mfelements/client-api@c1d46f2/node.min.js',
 	'logger/decorated': 'https://cdn.jsdelivr.net/gh/mfelements/logger@0.0.4/decorated.min.js',
 	bit64: 'https://cdn.jsdelivr.net/gh/mfelements/bit64@v0.0.1/index.min.js',
 	hostname: 'https://cdn.jsdelivr.net/gh/mfelements/hostname@v0.0.1/index.min.js',
