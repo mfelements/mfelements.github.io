@@ -68,7 +68,7 @@ module._predefined = (() => {
 		},
 		async getApiUrl(){
 			if(!ServiceAPI.modules) ServiceAPI.downloadModules();
-			const serviceLink = await mainThreadAction('getServiceLink');
+			const serviceLink = new URL(await mainThreadAction('getLocation')).pathname.slice(1);
 			const Hostname = await ServiceAPI.modules.hostname;
 			const url = new URL('https://' + decodeURIComponent(serviceLink));
 			if(new Hostname(url.hostname).local) url.protocol = 'http';
@@ -346,5 +346,16 @@ module._predefined = (() => {
 				}
 			})()
 		},
+		service: __esModule({
+			async getArgs(){
+				const text = new URL(await mainThreadAction('getLocation')).search.slice(1);
+				const res = {};
+				for(const arg of text.split('&')){
+					const splitted = arg.split('=');
+					res[decodeURIComponent(splitted.shift())] = decodeURIComponent(splitted.join('='))
+				}
+				return res
+			}
+		}),
 	}
 })();

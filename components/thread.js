@@ -137,8 +137,8 @@ const actions = {
         return this.api[name](...args)
     },
     requestAuth,
-    getServiceLink(){
-        return location.pathname.slice(1)
+    getLocation(){
+        return location.href
     },
     isIntercepted,
     callIntercepted,
