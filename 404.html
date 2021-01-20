@@ -21,16 +21,28 @@
             --text-light-color: #000;
             --text-dark-color: #fff;
             --btn-shadow:
-                0 -0.5rem 1rem rgba(255, 255, 255, 0.5),
-                0 0.5rem 1rem rgba(221, 221, 221, 0.25);
+                0 -.5rem 1rem rgba(255, 255, 255, .5),
+                0 .5rem 1rem rgba(221, 221, 221, .25);
             --block-shadow:
-                0px 3px 5px -1px rgba(0, 0, 0, 0.2),
-                0px 6px 10px 0px rgba(0, 0, 0, 0.14),
-                0px 1px 18px 0px rgba(0,0,0,.12);
+                0px 3px 5px -1px rgba(0, 0, 0, .2),
+                0px 6px 10px 0px rgba(0, 0, 0, .14),
+                0px 1px 18px 0px rgba(0, 0, 0, .12);
             --transition-speed: .2s;
             --border-radius: .28rem;
             --invert-amount: 0%;
             --live-record-color: #f00;
+        }
+        @media (prefers-color-scheme: dark) {
+            html{
+                --theme-light-color: #212b3a;
+                --theme-dark-color: #768092;
+                --bg-primary: #1f1f1f;
+                --bg-secondary: #242424;
+                --text-color: #d4d4d4;
+                --text-mid-color: #242424;
+                --text-light-color: #d4d4d4;
+                --text-dark-color: #242424;
+            }
         }
     </style>
     <style>

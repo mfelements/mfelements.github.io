@@ -51,6 +51,7 @@ button.md-btn{
     border-radius: var(--border-radius);
     white-space: nowrap;
     cursor: pointer;
+    color: var(--text-color);
 }
 
 .block{
