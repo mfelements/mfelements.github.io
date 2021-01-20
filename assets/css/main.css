@@ -107,7 +107,7 @@ div.tblock > * {
     padding-bottom: calc(100% / var(--ratio-w) * var(--ratio-h));
 }
 
-.image[invert]{
+.image[invertable]{
     filter: invert(calc(100% - var(--invert-amount)));
 }
 

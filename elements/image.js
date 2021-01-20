@@ -11,11 +11,11 @@ export default class Image extends Component{
         if(url.protocol !== 'https:') throw new Error('Image cannot be loaded. Only HTTPS links are supported')
     }
     render(){
-        const { src, ratio, round, width, invert } = this.props;
+        const { src, ratio, round, width, invertable } = this.props;
         const props = {
             class: 'image',
             style: {},
-            invert,
+            invertable,
         };
         let children;
         if(ratio){
