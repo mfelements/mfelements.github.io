@@ -426,6 +426,13 @@ svg.md-spinner > circle{
     margin: 0 !important;
 }
 
+.markdown-rendered blockquote{
+    border-left: .2em solid var(--text-color);
+    font-style: italic;
+    margin: 1em 2.5em 1em 0;
+    padding: 0 0 0 2.3em;
+}
+
 button.md-btn, .block, div.tblock, .image{
     --font-size: var(--font-size-override, 1rem);
 }
@@ -450,4 +457,9 @@ button.md-btn, .block, div.tblock, .image{
         width: 100%;
         max-width: calc(100% - 6rem);
     }
+}
+
+a{
+    text-decoration: none;
+    color: var(--theme-color);
 }
