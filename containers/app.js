@@ -32,7 +32,8 @@ export default class App extends Component{
         new Promise((r => this._loadAppTitle = r)).then(appName => {
             console.info('Service %c%s%c loaded successfully in %c%fs', 'font-weight: bold; color: #1162ce', appName, '', 'font-weight: bold; color: gray', Math.round((Date.now() - start) / 100) / 10);
             console.groupEnd();
-            console.group('Service logs')
+            console.group('Service logs');
+            window.addEventListener('close', () => console.groupEnd()) // usable in iframes
         })
     }
     async componentDidMount(){
