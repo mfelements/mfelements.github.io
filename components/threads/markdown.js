@@ -22,6 +22,16 @@ function _blankifyLinks(md, isLinkRelative){
     }
 }
 
+function _identifiedHeadings(md){
+    const defaultRender = md.renderer.rules.heading_open ||
+        ((tokens, idx, options, env, self) => self.renderToken(tokens, idx, options));
+    md.renderer.rules.heading_open = (tokens, i, options, env, self) => {
+        const id = md.renderer.render(tokens[i + 1].children, md.options).replace(/ /g, '-');
+        tokens[i].attrSet('id', id);
+        return defaultRender(tokens, i, options, env, self)
+    }
+}
+
 async function onload(md){
     const loc = await locationModule;
     _blankifyLinks(md, href => {
@@ -29,6 +39,7 @@ async function onload(md){
         return loc.origin === loc2.origin &&
             _normalizePathname(loc2.pathname).startsWith(_normalizePathname(loc.pathname))
     });
+    _identifiedHeadings(md);
     md.disable('image');
     return md
 }
