@@ -57,6 +57,8 @@ module._predefined = (() => {
 
 	const logger = importModule('@mfelements/logger');
 
+	const locationModule = mainThreadAction('getLocation').then(v => new URL(v));
+
 	/** @namespace */
 	const ServiceAPI = {
 		downloadModules(){
@@ -68,7 +70,7 @@ module._predefined = (() => {
 		},
 		async getApiUrl(){
 			if(!ServiceAPI.modules) ServiceAPI.downloadModules();
-			const serviceLink = new URL(await mainThreadAction('getLocation')).pathname.slice(1);
+			const serviceLink = (await locationModule).pathname.slice(1);
 			const Hostname = await ServiceAPI.modules.hostname;
 			const url = new URL('https://' + decodeURIComponent(serviceLink));
 			if(new Hostname(url.hostname).local) url.protocol = 'http';
@@ -178,6 +180,10 @@ module._predefined = (() => {
 		const id = generateActionStorageId(module.streamStorage);
 		module.streamStorage[id] = { next: callback };
 		return id
+	}
+
+	function getLocation(){
+		return locationModule
 	}
 
 	return {
@@ -347,8 +353,9 @@ module._predefined = (() => {
 			})()
 		},
 		service: __esModule({
+			getLocation,
 			async getArgs(){
-				const text = new URL(await mainThreadAction('getLocation')).search.slice(1);
+				const text = (await locationModule).search.slice(1);
 				const res = {};
 				for(const arg of text.split('&')){
 					const splitted = arg.split('=');
