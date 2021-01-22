@@ -8,8 +8,8 @@ module._precompiled = {
 };
 
 module._preconfigured = {
-	'electrumx-api': '',
-	'wallet-api': 'https://cdn.jsdelivr.net/gh/mfelements/client-api@0c22674/node.min.js',
+	'electrumx-api': 'https://cdn.jsdelivr.net/gh/mfelements/client-api@f190b2c/electrumx.min.js',
+	'wallet-api': 'https://cdn.jsdelivr.net/gh/mfelements/client-api@f190b2c/node.min.js',
 	'logger/decorated': 'https://cdn.jsdelivr.net/gh/mfelements/logger@0.0.4/decorated.min.js',
 	bit64: 'https://cdn.jsdelivr.net/gh/mfelements/bit64@v0.0.1/index.min.js',
 	hostname: 'https://cdn.jsdelivr.net/gh/mfelements/hostname@v0.0.1/index.min.js',
