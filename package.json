@@ -4,5 +4,7 @@
         "htm": "*",
         "plyr": "3.6.2",
         "preact": "*"
-    }
+    },
+    "repository": "github:mfelements/mfelements.github.io",
+    "stable": "93d319e"
 }
