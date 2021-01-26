@@ -108,7 +108,7 @@ div.tblock > * {
 }
 
 .image[invertable]{
-    filter: invert(calc(100% - var(--invert-amount)));
+    filter: invert(var(--invert-amount));
 }
 
 .image > img{
