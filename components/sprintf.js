@@ -4,9 +4,8 @@ const types = {
 }
 
 export default (text, ...replacements) => {
-    let _text = text;
     for(const replacement of replacements){
-        _text = _text.replace(types[typeof replacement], replacement)
+        text = text.replace(types[typeof replacement], replacement)
     }
-    return _text
+    return text
 }

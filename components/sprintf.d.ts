@@ -1,3 +1,1 @@
-function sprintf(text: string, ...replacements: (string | number)[]): string
-
-export default sprintf
+export default function sprintf(text: string, ...replacements: (string | number)[]): string
