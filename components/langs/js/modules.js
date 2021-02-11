@@ -1,24 +1,18 @@
 // list of predefined modules
 
-module._precompiled = {
-	'bitcoinjs-lib': 'https://cdn.jsdelivr.net/gh/mfelements/bitcoinjs-lib@v4.0.3-2/dist/index.js',
-	'bitcoinjs-message': 'https://cdn.jsdelivr.net/gh/mfelements/bitcoinjs-message@v2.1.3-1/dist/index.js',
-	'markdown-it': 'https://cdn.jsdelivr.net/npm/markdown-it@11.0.0/dist/markdown-it.min.js',
-	logger: 'https://cdn.jsdelivr.net/gh/mfelements/logger@0.0.4/index.min.js',
-};
+Object.assign(module, (() => {
+	const jsdelivr = 'https://cdn.jsdelivr.net',
+		unpkg = 'https://unpkg.com',
+		jsdGh = `${jsdelivr}/gh`,
+		jsdNpm = `${jsdelivr}/npm`,
+		mfeBase = `${jsdGh}/mfelements`,
+		clientApiUrl = `${mfeBase}/client-api@5faa499`,
+		userMediaUrl = `${mfeBase}/UserMedia@v0.0.5`,
+		components = new URL('../../components', location.href).href,
+		canvaskitCDNRoot = `${unpkg}/canvaskit-wasm@0.18.1/bin/`,
+		userMedia = `${userMediaUrl}/index.min.js`,
+		nimiqQrScanner = `${jsdGh}/nimiq/qr-scanner@e8a77de/qr-scanner.min.js`;
 
-module._preconfigured = {
-	'electrumx-api': 'https://cdn.jsdelivr.net/gh/mfelements/client-api@f190b2c/electrumx.min.js',
-	'wallet-api': 'https://cdn.jsdelivr.net/gh/mfelements/client-api@f190b2c/node.min.js',
-	'logger/decorated': 'https://cdn.jsdelivr.net/gh/mfelements/logger@0.0.4/decorated.min.js',
-	bit64: 'https://cdn.jsdelivr.net/gh/mfelements/bit64@v0.0.1/index.min.js',
-	hostname: 'https://cdn.jsdelivr.net/gh/mfelements/hostname@v0.0.1/index.min.js',
-	fetch: new URL('../../components/fetch.js', location.href).href,
-	stream: new URL('../../components/stream.js', location.href).href,
-	'user-media/canvas-wrapper': 'https://cdn.jsdelivr.net/gh/mfelements/UserMedia@v0.0.3/canvas-wrapped.min.js',
-};
-
-module._predefined = (() => {
 	function rand(d){
 		const res = Math.random().toString(36).substring(2, 15);
 		return d ? res + rand(d - 1) : res
@@ -138,14 +132,7 @@ module._predefined = (() => {
 		})),
 	}
 
-	const canvaskitCDNRoot = 'https://unpkg.com/canvaskit-wasm@0.18.1/bin/';
-
 	const moduleCache = Object.create(null);
-
-	const moduleRoot = {
-		userMedia: 'https://cdn.jsdelivr.net/gh/mfelements/UserMedia@v0.0.5/index.min.js',
-		nimiqQrScanner: 'https://cdn.jsdelivr.net/gh/nimiq/qr-scanner@e8a77de/qr-scanner.min.js',
-	};
 
 	const hasInstance = Object[Symbol.hasInstance];
 
@@ -187,182 +174,200 @@ module._predefined = (() => {
 	}
 
 	return {
-		rand,
-		get 'service-api'(){
-			ServiceAPI.downloadModules();
-			return ServiceAPI.mainInterface.then(({ proxy: v }) => ServiceAPI.url.then(url => __esModule({
-				default: v,
-				callWithOptions: (options, method, ...args) => v[method].apply(new ServiceAPI.APICallOptions(options), args),
-				url,
-			})))
+		_precompiled: {
+			'bitcoinjs-lib': `${mfeBase}/bitcoinjs-lib@v4.0.3-2/dist/index.js`,
+			'bitcoinjs-message': `${mfeBase}/bitcoinjs-message@v2.1.3-1/dist/index.js`,
+			'markdown-it': `${jsdNpm}/markdown-it@11.0.0/dist/markdown-it.min.js`,
+			logger: `${mfeBase}/logger@0.0.4/index.min.js`,
 		},
-		'request-auth'(keys){
-			return new Promise((resolve, reject) => {
-				const id = generateActionStorageId();
-				module.actionStorage[id] = { resolve, reject };
-				postMessage({
-					resultableAction: 'requestAuth',
-					args: [ keys ],
-					id
-				});
-			})
+		_preconfigured: {
+			'electrumx-api': `${clientApiUrl}/electrumx.min.js`,
+			'wallet-api': `${clientApiUrl}/node.min.js`,
+			'logger/decorated': `${mfeBase}/logger@0.0.4/decorated.min.js`,
+			bit64: `${mfeBase}/bit64@v0.0.1/index.min.js`,
+			hostname: `${mfeBase}/hostname@v0.0.1/index.min.js`,
+			fetch: `${components}/fetch.js`,
+			stream: `${components}/stream.js`,
+			'user-media/canvas-wrapper': `${userMediaUrl}/canvas-wrapped.min.js`,
 		},
-		async 'download-file'(blob, name){
-			const url = URL.createObjectURL(blob);
-			mainThreadAction('downloadFile', url, name);
-			await sleep(50);
-			URL.revokeObjectURL(url)
-		},
-		get canvaskit(){
-			if(!('canvaskit' in moduleCache)){
-				const document = {
-					createElement(){
-						const e = {
-							click(){
-								mainThreadAction('downloadFile', e.href, e.download)
-							},
-							remove(){}
-						}
-						return e
-					},
-					body: {
-						appendChild(){}
-					}
-				};
-				function F(...args){
-					return new Function('window', ...args).bind(self, self)
-				}
-				F.prototype = Object.create(Function);
-				Object.defineProperty(F, Symbol.hasInstance, { value: i => i instanceof Function });
-				moduleCache.canvaskit = requireAsync.call({ skipTransform: true, additionalScope: { Function: F, window: self, document } }, canvaskitCDNRoot + 'canvaskit.js')
-					.then(init => init({ locateFile: f => canvaskitCDNRoot + f }))
-					.then(v => __esModule({ default: v }));
-			}
-			return moduleCache.canvaskit
-		},
-		get 'user-media'(){
-			if(!('userMedia' in moduleCache)) moduleCache.userMedia = requireAsync.call({
-				additionalScope: {
-					streamStorage: module.streamStorage,
-					mainThreadAction,
-					endStream(id){
-						postMessage({
-							stream: id,
-							method: 'end',
-							args: [],
-						})
-					},
-				}
-			}, moduleRoot.userMedia);
-			return moduleCache.userMedia
-		},
-		'stream-definitions': __esModule({
-			ReadableStream,
-			WritableStream,
-			DuplexStream,
-		}),
-		get 'nimiq-qr-scanner'(){
-			return (async () => {
-				const moduleId = await mainThreadAction('nativeImport', moduleRoot.nimiqQrScanner);
-				const emptyVal = Symbol();
-				return class QrScanner{
-					static hasCamera(){
-						return mainThreadAction('moduleExec', moduleId, 'return module.default.hasCamera()')
-					}
-					static scanImage(imageOrFileOrUrl, scanRegion = emptyVal, qrEngine = emptyVal, canvas = emptyVal, fixedCanvasSize = emptyVal, alsoTryWithoutScanRegion = emptyVal){
-						if(imageOrFileOrUrl instanceof Blob) imageOrFileOrUrl = URL.createObjectURL(imageOrFileOrUrl);
-						else if(imageOrFileOrUrl instanceof Uint8ClampedArray || imageOrFileOrUrl instanceof Uint8Array) imageOrFileOrUrl = Array.from(imageOrFileOrUrl);
-						const args = ['imageOrFileOrUrl'];
-						[ scanRegion, qrEngine, canvas, fixedCanvasSize, alsoTryWithoutScanRegion ].forEach(val => {
-							if(val !== emptyVal) args.push(JSON.stringify(val))
-						});
-						return mainThreadAction('moduleExec', moduleId, `
-							let imageOrFileOrUrl = ${JSON.stringify(imageOrFileOrUrl)};
-							if(imageOrFileOrUrl instanceof Array) imageOrFileOrUrl = Uint8ClampedArray.from(imageOrFileOrUrl);
-							return module.default.scanImage(${JSON.stringify(args).slice(1, -1)})
-						`)
-					}
-					static async createQrEngine(){
-						throw new EvalError('Cannot call createQrEngine from another thread')
-					}
-					constructor(video, onDecode = emptyVal, canvasSizeOrOnDecodeError = emptyVal, canvasSizeOrCalculateScanRegion = emptyVal, preferredFacingMode = emptyVal){
-						this._flashOn = false;
-						this._videoId = '_nimiq_qr_video_' + rand();
-						this._callbacks = [];
-						const constructorArgs = ['videoElement'];
-						[onDecode, canvasSizeOrOnDecodeError, canvasSizeOrCalculateScanRegion].forEach(callback => {
-							if(callback !== emptyVal){
-								const id = registerCallback(callback);
-								this._callbacks.push(id);
-								constructorArgs.push(`getCallback(${JSON.stringify(id)})`)
+		_predefined: {
+			rand,
+			get 'service-api'(){
+				ServiceAPI.downloadModules();
+				return ServiceAPI.mainInterface.then(({ proxy: v }) => ServiceAPI.url.then(url => __esModule({
+					default: v,
+					callWithOptions: (options, method, ...args) => v[method].apply(new ServiceAPI.APICallOptions(options), args),
+					url,
+				})))
+			},
+			'request-auth'(keys){
+				return new Promise((resolve, reject) => {
+					const id = generateActionStorageId();
+					module.actionStorage[id] = { resolve, reject };
+					postMessage({
+						resultableAction: 'requestAuth',
+						args: [ keys ],
+						id
+					});
+				})
+			},
+			async 'download-file'(blob, name){
+				const url = URL.createObjectURL(blob);
+				mainThreadAction('downloadFile', url, name);
+				await sleep(50);
+				URL.revokeObjectURL(url)
+			},
+			get canvaskit(){
+				if(!('canvaskit' in moduleCache)){
+					const document = {
+						createElement(){
+							const e = {
+								click(){
+									mainThreadAction('downloadFile', e.href, e.download)
+								},
+								remove(){}
 							}
-						});
-						if(preferredFacingMode !== emptyVal) constructorArgs.push(JSON.stringify(preferredFacingMode));
-						this._init = mainThreadAction('moduleExec', moduleId, `
-							const videoElement = document.createElement('video');
-							videoElement.id = '${this._videoId}';
-							videoElement.classList.add('camera-video', 'fullscreen');
-							videoElement.muted = true;
-							document.body.appendChild(videoElement);
-							moduleStorage.${this._videoId} = new module.default(${constructorArgs.join(', ')});
-						`);
+							return e
+						},
+						body: {
+							appendChild(){}
+						}
+					};
+					function F(...args){
+						return new Function('window', ...args).bind(self, self)
 					}
-					async _callMethod(name, ...args){
-						await this._init;
-						return mainThreadAction('moduleExec', moduleId, `return moduleStorage.${this._videoId}.${name}(${JSON.stringify(args).slice(1, -1)})`)
-					}
-					_setFlash(state){
-						return this._callMethod('_setFlash', state)
-					}
-					hasFlash(){
-						return this._callMethod('hasFlash')
-					}
-					isFlashOn(){
-						return this._flashOn;
-					}
-					toggleFlash(){
-						return this._setFlash(!this._flashOn)
-					}
-					turnFlashOff(){
-						return this._setFlash(false)
-					}
-					turnFlashOn(){
-						return this._setFlash(true)
-					}
-					destroy(){
-						this._callMethod('destroy');
-						mainThreadAction('moduleExec', moduleId, `const e = '${this._videoId}'; e.parentElement.removeChild(e)`);
-						this._callbacks.forEach(id => mainThreadAction('unregisterCallback', id))
-					}
-					start(){
-						return this._callMethod('start')
-					}
-					stop(){
-						this._callMethod('stop')
-					}
-					pause(){
-						this._callMethod('pause')
-					}
-					setGrayscaleWeights(...args){
-						this._callMethod('setGrayscaleWeights', ...args)
-					}
-					setInversionMode(...args){
-						this._callMethod('setInversionMode', ...args)
-					}
+					F.prototype = Object.create(Function);
+					Object.defineProperty(F, Symbol.hasInstance, { value: i => i instanceof Function });
+					moduleCache.canvaskit = requireAsync.call({ skipTransform: true, additionalScope: { Function: F, window: self, document } }, canvaskitCDNRoot + 'canvaskit.js')
+						.then(init => init({ locateFile: f => canvaskitCDNRoot + f }))
+						.then(v => __esModule({ default: v }));
 				}
-			})()
+				return moduleCache.canvaskit
+			},
+			get 'user-media'(){
+				if(!('userMedia' in moduleCache)) moduleCache.userMedia = requireAsync.call({
+					additionalScope: {
+						streamStorage: module.streamStorage,
+						mainThreadAction,
+						endStream(id){
+							postMessage({
+								stream: id,
+								method: 'end',
+								args: [],
+							})
+						},
+					}
+				}, userMedia);
+				return moduleCache.userMedia
+			},
+			'stream-definitions': __esModule({
+				ReadableStream,
+				WritableStream,
+				DuplexStream,
+			}),
+			get 'nimiq-qr-scanner'(){
+				return (async () => {
+					const moduleId = await mainThreadAction('nativeImport', nimiqQrScanner);
+					const emptyVal = Symbol();
+					return class QrScanner{
+						static hasCamera(){
+							return mainThreadAction('moduleExec', moduleId, 'return module.default.hasCamera()')
+						}
+						static scanImage(imageOrFileOrUrl, scanRegion = emptyVal, qrEngine = emptyVal, canvas = emptyVal, fixedCanvasSize = emptyVal, alsoTryWithoutScanRegion = emptyVal){
+							if(imageOrFileOrUrl instanceof Blob) imageOrFileOrUrl = URL.createObjectURL(imageOrFileOrUrl);
+							else if(imageOrFileOrUrl instanceof Uint8ClampedArray || imageOrFileOrUrl instanceof Uint8Array) imageOrFileOrUrl = Array.from(imageOrFileOrUrl);
+							const args = ['imageOrFileOrUrl'];
+							[ scanRegion, qrEngine, canvas, fixedCanvasSize, alsoTryWithoutScanRegion ].forEach(val => {
+								if(val !== emptyVal) args.push(JSON.stringify(val))
+							});
+							return mainThreadAction('moduleExec', moduleId, `
+								let imageOrFileOrUrl = ${JSON.stringify(imageOrFileOrUrl)};
+								if(imageOrFileOrUrl instanceof Array) imageOrFileOrUrl = Uint8ClampedArray.from(imageOrFileOrUrl);
+								return module.default.scanImage(${JSON.stringify(args).slice(1, -1)})
+							`)
+						}
+						static async createQrEngine(){
+							throw new EvalError('Cannot call createQrEngine from another thread')
+						}
+						constructor(video, onDecode = emptyVal, canvasSizeOrOnDecodeError = emptyVal, canvasSizeOrCalculateScanRegion = emptyVal, preferredFacingMode = emptyVal){
+							this._flashOn = false;
+							this._videoId = '_nimiq_qr_video_' + rand();
+							this._callbacks = [];
+							const constructorArgs = ['videoElement'];
+							[onDecode, canvasSizeOrOnDecodeError, canvasSizeOrCalculateScanRegion].forEach(callback => {
+								if(callback !== emptyVal){
+									const id = registerCallback(callback);
+									this._callbacks.push(id);
+									constructorArgs.push(`getCallback(${JSON.stringify(id)})`)
+								}
+							});
+							if(preferredFacingMode !== emptyVal) constructorArgs.push(JSON.stringify(preferredFacingMode));
+							this._init = mainThreadAction('moduleExec', moduleId, `
+								const videoElement = document.createElement('video');
+								videoElement.id = '${this._videoId}';
+								videoElement.classList.add('camera-video', 'fullscreen');
+								videoElement.muted = true;
+								document.body.appendChild(videoElement);
+								moduleStorage.${this._videoId} = new module.default(${constructorArgs.join(', ')});
+							`);
+						}
+						async _callMethod(name, ...args){
+							await this._init;
+							return mainThreadAction('moduleExec', moduleId, `return moduleStorage.${this._videoId}.${name}(${JSON.stringify(args).slice(1, -1)})`)
+						}
+						_setFlash(state){
+							return this._callMethod('_setFlash', state)
+						}
+						hasFlash(){
+							return this._callMethod('hasFlash')
+						}
+						isFlashOn(){
+							return this._flashOn;
+						}
+						toggleFlash(){
+							return this._setFlash(!this._flashOn)
+						}
+						turnFlashOff(){
+							return this._setFlash(false)
+						}
+						turnFlashOn(){
+							return this._setFlash(true)
+						}
+						destroy(){
+							this._callMethod('destroy');
+							mainThreadAction('moduleExec', moduleId, `const e = '${this._videoId}'; e.parentElement.removeChild(e)`);
+							this._callbacks.forEach(id => mainThreadAction('unregisterCallback', id))
+						}
+						start(){
+							return this._callMethod('start')
+						}
+						stop(){
+							this._callMethod('stop')
+						}
+						pause(){
+							this._callMethod('pause')
+						}
+						setGrayscaleWeights(...args){
+							this._callMethod('setGrayscaleWeights', ...args)
+						}
+						setInversionMode(...args){
+							this._callMethod('setInversionMode', ...args)
+						}
+					}
+				})()
+			},
+			service: __esModule({
+				getLocation,
+				async getArgs(){
+					const text = (await locationModule).search.slice(1);
+					const res = {};
+					for(const arg of text.split('&')){
+						const splitted = arg.split('=');
+						res[decodeURIComponent(splitted.shift())] = decodeURIComponent(splitted.join('='))
+					}
+					return res
+				}
+			}),
 		},
-		service: __esModule({
-			getLocation,
-			async getArgs(){
-				const text = (await locationModule).search.slice(1);
-				const res = {};
-				for(const arg of text.split('&')){
-					const splitted = arg.split('=');
-					res[decodeURIComponent(splitted.shift())] = decodeURIComponent(splitted.join('='))
-				}
-				return res
-			}
-		}),
 	}
-})();
+})());
