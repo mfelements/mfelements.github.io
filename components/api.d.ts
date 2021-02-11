@@ -13,7 +13,7 @@ export function registerAction(moduleUrl: string, name: string, callback: (...ar
 
 export function unregisterActions(moduleUrl: string): void
 
-export function getApiUrl(): string
+export function getApiUrl(): Promise<string>
 
 export class APICallOptions{
     constructor(options: {
