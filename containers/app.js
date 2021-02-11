@@ -67,14 +67,27 @@ export default class App extends Component{
             }), logoDisplayTimeout + transitionDelay)
         } catch(e){
             console.error(e);
-            this.setState({ error: `${e.name}: ${e.message}` })
+            this.setState({ error: e.name ? `${e.name}: ${e.message}` : `${e}` })
         }
     }
     componentWillUnmount(){
         currentApp = null
     }
     render(){
-        const { generated, error, serviceLogo, mfeLogo, showLoadingIndexText, serviceLogoTimeoutDone, title, serviceTitle, mfeThemeColor, mfeTextColor, themeColor, textColor } = this.state;
+        const {
+            generated,
+            error,
+            serviceLogo,
+            mfeLogo,
+            showLoadingIndexText,
+            serviceLogoTimeoutDone,
+            title,
+            serviceTitle,
+            mfeThemeColor,
+            mfeTextColor,
+            themeColor,
+            textColor,
+        } = this.state;
         const doShowServiceLoading = !!((generated && generated._M_dummy) || !serviceLogoTimeoutDone),
             doShowMFELoading = !generated && doShowServiceLoading,
             generateDone = generated && !generated._M_dummy;
